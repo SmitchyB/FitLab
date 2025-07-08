@@ -8,17 +8,17 @@
       Title="MyGrowthPage">
 
     <Grid>
-        <Border BorderBrush="DodgerBlue"
+        <Border BorderBrush="#9a42ff"
                 BorderThickness="2"
                 CornerRadius="5"
                 Margin="20"
-                Background="#F0F8FF">
+                Background="#222">
             <TextBlock Text="Welcome to the My Growth Page!"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"
                        FontSize="28"
                        FontWeight="Bold"
-                       Foreground="#333333"/>
+                       Foreground="#9a42ff"/>
         </Border>
     </Grid>
 </Page>

@@ -4,7 +4,8 @@
         xmlns:components="clr-namespace:FitLab.Components"
         Title="FitLab Main Application"
         Height="600"
-        Width="900">
+        Width="900"
+        Background="#222">
     <DockPanel>
         <components:HeaderControl DockPanel.Dock="Top"/>
         <Frame x:Name="MainFrame" x:FieldModifier="public"
