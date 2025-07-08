@@ -1,0 +1,146 @@
+﻿<UserControl x:Class="FitLab.Components.HeaderControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="120" d:DesignWidth="800">
+    <UserControl.Resources>
+        <!-- Style for Icon Buttons -->
+        <Style x:Key="IconButton" TargetType="Button">
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+
+        <!-- Show Menu Storyboard -->
+        <Storyboard x:Key="ShowMenuStoryboard">
+            <!-- Home Button -->
+            <DoubleAnimation Storyboard.TargetName="BtnHome" Storyboard.TargetProperty="Opacity"
+                         From="0" To="1" Duration="0:0:0.2" BeginTime="0:0:0"/>
+            <ThicknessAnimation Storyboard.TargetName="BtnHome" Storyboard.TargetProperty="Margin"
+                            From="0,0,0,0" To="5,0,0,0" Duration="0:0:0.2" BeginTime="0:0:0"/>
+
+            <!-- MyBody Button -->
+            <DoubleAnimation Storyboard.TargetName="BtnMyBody" Storyboard.TargetProperty="Opacity"
+                         From="0" To="1" Duration="0:0:0.2" BeginTime="0:0:0.1"/>
+            <ThicknessAnimation Storyboard.TargetName="BtnMyBody" Storyboard.TargetProperty="Margin"
+                            From="0,0,0,0" To="5,0,0,0" Duration="0:0:0.2" BeginTime="0:0:0.1"/>
+
+            <!-- MyGrowth Button -->
+            <DoubleAnimation Storyboard.TargetName="BtnMyGrowth" Storyboard.TargetProperty="Opacity"
+                         From="0" To="1" Duration="0:0:0.2" BeginTime="0:0:0.2"/>
+            <ThicknessAnimation Storyboard.TargetName="BtnMyGrowth" Storyboard.TargetProperty="Margin"
+                            From="0,0,0,0" To="5,0,0,0" Duration="0:0:0.2" BeginTime="0:0:0.2"/>
+
+            <!-- WorkoutPlan Button -->
+            <DoubleAnimation Storyboard.TargetName="BtnWorkoutPlan" Storyboard.TargetProperty="Opacity"
+                         From="0" To="1" Duration="0:0:0.2" BeginTime="0:0:0.3"/>
+            <ThicknessAnimation Storyboard.TargetName="BtnWorkoutPlan" Storyboard.TargetProperty="Margin"
+                            From="0,0,0,0" To="5,0,0,0" Duration="0:0:0.2" BeginTime="0:0:0.3"/>
+
+            <!-- Settings Button -->
+            <DoubleAnimation Storyboard.TargetName="BtnSettings" Storyboard.TargetProperty="Opacity"
+                         From="0" To="1" Duration="0:0:0.2" BeginTime="0:0:0.4"/>
+            <ThicknessAnimation Storyboard.TargetName="BtnSettings" Storyboard.TargetProperty="Margin"
+                            From="0,0,0,0" To="5,0,0,0" Duration="0:0:0.2" BeginTime="0:0:0.4"/>
+        </Storyboard>
+
+        <!-- Hide Menu Storyboard (reverse) -->
+        <Storyboard x:Key="HideMenuStoryboard">
+            <!-- Settings Button -->
+            <DoubleAnimation Storyboard.TargetName="BtnSettings" Storyboard.TargetProperty="Opacity"
+                         From="1" To="0" Duration="0:0:0.2" BeginTime="0:0:0"/>
+            <ThicknessAnimation Storyboard.TargetName="BtnSettings" Storyboard.TargetProperty="Margin"
+                            From="5,0,0,0" To="0,0,0,0" Duration="0:0:0.2" BeginTime="0:0:0"/>
+
+            <!-- WorkoutPlan Button -->
+            <DoubleAnimation Storyboard.TargetName="BtnWorkoutPlan" Storyboard.TargetProperty="Opacity"
+                         From="1" To="0" Duration="0:0:0.2" BeginTime="0:0:0.1"/>
+            <ThicknessAnimation Storyboard.TargetName="BtnWorkoutPlan" Storyboard.TargetProperty="Margin"
+                            From="5,0,0,0" To="0,0,0,0" Duration="0:0:0.2" BeginTime="0:0:0.1"/>
+
+            <!-- MyGrowth Button -->
+            <DoubleAnimation Storyboard.TargetName="BtnMyGrowth" Storyboard.TargetProperty="Opacity"
+                         From="1" To="0" Duration="0:0:0.2" BeginTime="0:0:0.2"/>
+            <ThicknessAnimation Storyboard.TargetName="BtnMyGrowth" Storyboard.TargetProperty="Margin"
+                            From="5,0,0,0" To="0,0,0,0" Duration="0:0:0.2" BeginTime="0:0:0.2"/>
+
+            <!-- MyBody Button -->
+            <DoubleAnimation Storyboard.TargetName="BtnMyBody" Storyboard.TargetProperty="Opacity"
+                         From="1" To="0" Duration="0:0:0.2" BeginTime="0:0:0.3"/>
+            <ThicknessAnimation Storyboard.TargetName="BtnMyBody" Storyboard.TargetProperty="Margin"
+                            From="5,0,0,0" To="0,0,0,0" Duration="0:0:0.2" BeginTime="0:0:0.3"/>
+
+            <!-- Home Button -->
+            <DoubleAnimation Storyboard.TargetName="BtnHome" Storyboard.TargetProperty="Opacity"
+                         From="1" To="0" Duration="0:0:0.2" BeginTime="0:0:0.4"/>
+            <ThicknessAnimation Storyboard.TargetName="BtnHome" Storyboard.TargetProperty="Margin"
+                            From="5,0,0,0" To="0,0,0,0" Duration="0:0:0.2" BeginTime="0:0:0.4"/>
+        </Storyboard>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Centered Logo -->
+        <Image Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"
+           Source="/Assets/Images/LogoIdea2.png"
+           MaxHeight="60"/>
+
+        <!-- Menu Button + Menu Panel under the logo -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal"
+                HorizontalAlignment="Left" VerticalAlignment="Center"
+                Margin="10,5,0,0">
+            <Button x:Name="MenuButton"
+                Click="MenuButton_Click"
+                Style="{StaticResource IconButton}">
+                <Image Source="/Assets/Images/Menu.png"/>
+            </Button>
+            <StackPanel x:Name="MenuPanel"
+                Orientation="Horizontal"
+                VerticalAlignment="Center"
+                Opacity="1"
+                Margin="0,0,0,0">
+                <Button x:Name="BtnHome"
+                    Click="BtnHome_Click"
+                    Opacity="0" Margin="0,0,0,0"
+                    Style="{StaticResource IconButton}" ToolTip="Home">
+                    <Image Source="/Assets/Images/HomeIcon.png"/>
+                </Button>
+                <Button x:Name="BtnMyBody"
+                    Click="BtnMyBody_Click"
+                    Opacity="0" Margin="0,0,0,0"
+                    Style="{StaticResource IconButton}" ToolTip="My Body">
+                    <Image Source="/Assets/Images/MyBodyIcon.png"/>
+                </Button>
+                <Button x:Name="BtnMyGrowth"
+                    Click="BtnMyGrowth_Click"
+                    Opacity="0" Margin="0,0,0,0"
+                    Style="{StaticResource IconButton}" ToolTip="My Growth">
+                    <Image Source="/Assets/Images/MyGrowthIcon.png"/>
+                </Button>
+                <Button x:Name="BtnWorkoutPlan"
+                    Click="BtnWorkoutPlan_Click"
+                    Opacity="0" Margin="0,0,0,0"
+                    Style="{StaticResource IconButton}" ToolTip="Workout Plan">
+                    <Image Source="/Assets/Images/WorkoutPlanIcon.png"/>
+                </Button>
+                <Button x:Name="BtnSettings"
+                    Click="BtnSettings_Click"
+                    Opacity="0" Margin="0,0,0,0"
+                    Style="{StaticResource IconButton}" ToolTip="Settings">
+                    <Image Source="/Assets/Images/SettingIcon.png"/>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+
+</UserControl>

@@ -1,0 +1,14 @@
+﻿<Window x:Class="FitLab.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:components="clr-namespace:FitLab.Components"
+        Title="FitLab Main Application"
+        Height="600"
+        Width="900">
+    <DockPanel>
+        <components:HeaderControl DockPanel.Dock="Top"/>
+        <Frame x:Name="MainFrame" x:FieldModifier="public"
+               NavigationUIVisibility="Hidden"
+               Source="Pages/HomePage.xaml"/>
+    </DockPanel>
+</Window>

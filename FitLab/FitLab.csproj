@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\Images\CheckIcon.png" />
+    <None Remove="Assets\Images\HomeIcon.png" />
+    <None Remove="Assets\Images\LogoIdea2.png" />
+    <None Remove="Assets\Images\Menu.png" />
+    <None Remove="Assets\Images\MyBodyIcon.png" />
+    <None Remove="Assets\Images\MyGrowthIcon.png" />
+    <None Remove="Assets\Images\SettingIcon.png" />
+    <None Remove="Assets\Images\WorkoutPlanIcon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\Images\CheckIcon.png" />
+    <Resource Include="Assets\Images\HomeIcon.png" />
+    <Resource Include="Assets\Images\LogoIdea2.png" />
+    <Resource Include="Assets\Images\Menu.png" />
+    <Resource Include="Assets\Images\MyBodyIcon.png" />
+    <Resource Include="Assets\Images\MyGrowthIcon.png" />
+    <Resource Include="Assets\Images\SettingIcon.png" />
+    <Resource Include="Assets\Images\WorkoutPlanIcon.png" />
+  </ItemGroup>
+
+</Project>
