@@ -1,224 +1,181 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using FitLab.Data;
+using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media.Imaging;
-using Microsoft.Win32;
 
 namespace FitLab.Pages
 {
     public partial class MyBodyPage : Page
     {
-        // Data Collections
-        private readonly ObservableCollection<MealEntry> Meals = new();
-        private readonly ObservableCollection<GoalEntry> Goals = new();
-        private int _waterCupsToday = 0;
-        private int _currentWeek = 1;
+        private readonly LocalDatabaseService _db = new();
+        private User _user;
 
         public MyBodyPage()
         {
-            InitializeComponent();
+            InitializeComponent(); // THIS LINE IS MANDATORY
 
-            // Example default goals
-            Goals = new ObservableCollection<GoalEntry>
+            // Load user from DB
+            _user = _db.LoadFirstUser() ?? new User();
+
+            // Populate fields
+            TxtName.Text = _user.Name;
+            DatePickerDOB.SelectedDate = _user.DateOfBirth;
+            // Gender
+            foreach (ComboBoxItem item in CmbGender.Items)
             {
-                new() { Description = "Stay under 2000 calories.", Timeframe = "1 Month" }
-            };
+                if ((item.Content?.ToString() ?? "") == _user.Gender.Replace(" (On Hormones)", "").Replace(" (Not on Hormones)", ""))
+                {
+                    CmbGender.SelectedItem = item;
+                    break;
+                }
+            }
 
-            GoalsPanel.ItemsSource = Goals;
-            DatePickerSelectedDate.SelectedDate = DateTime.Today;
-
-            // Initialize week display
-            TxtCurrentWeek.Text = $"Week {_currentWeek}";
-
-            LoadForDate(DateTime.Today);
-        }
-
-        #region Models
-
-        public class MealEntry
-        {
-            public string MealTime { get; set; } = string.Empty;
-            public string Description { get; set; } = string.Empty;
-            public string PortionSize { get; set; } = string.Empty;
-            public int Calories { get; set; }
-        }
-
-        public class GoalEntry
-        {
-            public string Description { get; set; } = string.Empty;
-            public string Timeframe { get; set; } = string.Empty;
-        }
-
-        #endregion
-
-        #region Meal Logic
-
-        private void LoadForDate(DateTime date)
-        {
-            Meals.Clear();
-            Meals.Add(new MealEntry
+            if (_user.Gender.Contains("Trans-Feminine") || _user.Gender.Contains("Trans-Masculine"))
             {
-                MealTime = "Breakfast",
-                Description = $"Example meal on {date:MM/dd/yyyy}",
-                PortionSize = "1 cup",
-                Calories = 300
-            });
+                ChkOnHormones.Visibility = Visibility.Visible;
+                ChkOnHormones.IsChecked = _user.Gender.Contains("On Hormones");
+            }
 
-            _waterCupsToday = 0;
-
-            FoodIntakePanel.ItemsSource = Meals;
-            UpdateWaterDisplay();
+            // Height display in Feet/Inches by default
+            CmbHeightUnit.SelectedIndex = 2;
+            UpdateHeightDisplay(_user.HeightInches);
+            PanelFeetInches.Visibility = Visibility.Visible;
         }
-
-        private void BtnAddMeal_Click(object sender, RoutedEventArgs e)
+        private void UpdateHeightDisplay(double heightInches)
         {
-            Meals.Add(new MealEntry
+            if (CmbHeightUnit.SelectedItem is ComboBoxItem selected)
             {
-                MealTime = (CmbMealTime.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "",
-                Description = TxtDescription.Text,
-                PortionSize = TxtPortionSize.Text,
-                Calories = int.TryParse(TxtCalories.Text, out int cals) ? cals : 0
-            });
+                var unit = selected.Content?.ToString() ?? "";
 
-            CmbMealTime.SelectedIndex = -1;
-            TxtDescription.Text = "";
-            TxtPortionSize.Text = "";
-            TxtCalories.Text = "";
-        }
-
-        private void BtnEditMeal_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button btn && btn.Tag is MealEntry meal)
-            {
-                meal.MealTime = "Edited Meal";
-                meal.Description = "Edited Description";
-                meal.Calories = 999;
-                FoodIntakePanel.Items.Refresh();
+                if (unit == "Centimeters")
+                {
+                    TxtHeightPrimary.Text = Math.Round(Components.Conversions.InchesToCm(heightInches), 1).ToString();
+                }
+                else if (unit == "Inches")
+                {
+                    TxtHeightPrimary.Text = Math.Round(heightInches, 1).ToString();
+                }
+                else if (unit == "Feet/Inches")
+                {
+                    int feet = (int)(heightInches / 12);
+                    double inches = heightInches - (feet * 12);
+                    TxtHeightFeet.Text = feet.ToString();
+                    TxtHeightInches.Text = Math.Round(inches, 1).ToString();
+                }
             }
         }
 
-        private void BtnDeleteMeal_Click(object sender, RoutedEventArgs e)
+        private void CmbGender_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (sender is Button btn && btn.Tag is MealEntry meal)
-                Meals.Remove(meal);
-        }
-
-        #endregion
-
-        #region Water Logic
-
-        private void UpdateWaterDisplay()
-        {
-            TxtWaterCups.Text = $"{_waterCupsToday} cup{(_waterCupsToday == 1 ? "" : "s")}";
-        }
-
-        private void BtnPlusWater_Click(object sender, RoutedEventArgs e)
-        {
-            _waterCupsToday++;
-            UpdateWaterDisplay();
-        }
-
-        private void BtnMinusWater_Click(object sender, RoutedEventArgs e)
-        {
-            if (_waterCupsToday > 0)
+            if (CmbGender.SelectedItem is ComboBoxItem selected)
             {
-                _waterCupsToday--;
-                UpdateWaterDisplay();
+                var value = selected.Content?.ToString() ?? "";
+                if (value == "Trans-Feminine" || value == "Trans-Masculine")
+                {
+                    ChkOnHormones.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    ChkOnHormones.Visibility = Visibility.Collapsed;
+                }
             }
         }
 
-        #endregion
-
-        #region Goal Logic
-
-        private void BtnAddGoal_Click(object sender, RoutedEventArgs e)
+        private void CmbHeightUnit_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Goals.Add(new GoalEntry
-            {
-                Description = TxtGoalDescription.Text,
-                Timeframe = TxtGoalTimeframe.Text
-            });
+            // Hide panels
+            PanelSingleInput.Visibility = Visibility.Collapsed;
+            PanelFeetInches.Visibility = Visibility.Collapsed;
 
-            TxtGoalDescription.Text = "";
-            TxtGoalTimeframe.Text = "";
-        }
-
-        private void BtnEditGoal_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button btn && btn.Tag is GoalEntry goal)
+            if (CmbHeightUnit.SelectedItem is ComboBoxItem selected)
             {
-                TxtGoalDescription.Text = goal.Description;
-                TxtGoalTimeframe.Text = goal.Timeframe;
-                Goals.Remove(goal);
+                var value = selected.Content?.ToString() ?? "";
+
+                if (value == "Centimeters" || value == "Inches")
+                {
+                    PanelSingleInput.Visibility = Visibility.Visible;
+                }
+                else if (value == "Feet/Inches")
+                {
+                    PanelFeetInches.Visibility = Visibility.Visible;
+                }
+
+                // Update displayed values from stored height
+                UpdateHeightDisplay(_user.HeightInches);
             }
         }
 
-        private void BtnDeleteGoal_Click(object sender, RoutedEventArgs e)
+        private void BtnEdit_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button btn && btn.Tag is GoalEntry goal)
-                Goals.Remove(goal);
+
+            TxtName.IsReadOnly = false;
+            CmbGender.IsEnabled = true;
+            DatePickerDOB.IsEnabled = true;
+
+            // Height inputs enabled
+            TxtHeightPrimary.IsReadOnly = false;
+            TxtHeightFeet.IsReadOnly = false;
+            TxtHeightInches.IsReadOnly = false;
+
+            BtnUpdate.Visibility = Visibility.Visible;
         }
 
-        #endregion
-
-        #region Date Picker
-
-        private void DatePickerSelectedDate_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        private void BtnUpdate_Click(object sender, RoutedEventArgs e)
         {
-            if (DatePickerSelectedDate.SelectedDate.HasValue)
-                LoadForDate(DatePickerSelectedDate.SelectedDate.Value);
-        }
 
-        #endregion
+            // Save inputs to _user
+            _user.Name = TxtName.Text.Trim();
+            _user.DateOfBirth = DatePickerDOB.SelectedDate ?? DateTime.MinValue;
 
-        #region Week Selector Logic
-
-        private void BtnWeekBack_Click(object sender, RoutedEventArgs e)
-        {
-            if (_currentWeek > 1)
-                _currentWeek--;
-
-            TxtCurrentWeek.Text = $"Week {_currentWeek}";
-        }
-
-        private void BtnWeekForward_Click(object sender, RoutedEventArgs e)
-        {
-            _currentWeek++;
-            TxtCurrentWeek.Text = $"Week {_currentWeek}";
-        }
-
-        #endregion
-
-        #region Image Upload Logic
-
-        private void LoadImage(Image targetImage)
-        {
-            var dlg = new OpenFileDialog
+            // Gender
+            if (CmbGender.SelectedItem is ComboBoxItem selected)
             {
-                Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp",
-                Title = "Select an Image"
-            };
-
-            if (dlg.ShowDialog() == true)
-            {
-                var bitmap = new BitmapImage(new Uri(dlg.FileName));
-                targetImage.Source = bitmap;
+                var genderBase = selected.Content?.ToString() ?? "";
+                if (genderBase == "Trans-Feminine" || genderBase == "Trans-Masculine")
+                {
+                    _user.Gender = genderBase + (ChkOnHormones.IsChecked == true ? " (On Hormones)" : " (Not on Hormones)");
+                }
+                else
+                {
+                    _user.Gender = genderBase;
+                }
             }
+
+            // Height
+            if (CmbHeightUnit.SelectedItem is ComboBoxItem heightSelected)
+            {
+                var unit = heightSelected.Content?.ToString() ?? "";
+
+                if (unit == "Centimeters")
+                {
+                    if (double.TryParse(TxtHeightPrimary.Text, out double cm))
+                        _user.HeightInches = Components.Conversions.CmToInches(cm);
+                }
+                else if (unit == "Inches")
+                {
+                    if (double.TryParse(TxtHeightPrimary.Text, out double inches))
+                        _user.HeightInches = inches;
+                }
+                else if (unit == "Feet/Inches")
+                {
+                    if (int.TryParse(TxtHeightFeet.Text, out int feet) && double.TryParse(TxtHeightInches.Text, out double inches))
+                        _user.HeightInches = Components.Conversions.FeetInchesToInches(feet, inches);
+                }
+            }
+
+            // Save to DB
+            _db.SaveUser(_user);
+
+            // Disable editing
+            TxtName.IsReadOnly = true;
+            CmbGender.IsEnabled = false;
+            DatePickerDOB.IsEnabled = false;
+
+            TxtHeightPrimary.IsReadOnly = true;
+            TxtHeightFeet.IsReadOnly = true;
+            TxtHeightInches.IsReadOnly = true;
+
+            BtnUpdate.Visibility = Visibility.Collapsed;
         }
-
-        // Before Pictures
-        private void BtnUploadFrontal_Click(object sender, RoutedEventArgs e) => LoadImage(ImgFrontalPreview);
-        private void BtnUploadLeft_Click(object sender, RoutedEventArgs e) => LoadImage(ImgLeftPreview);
-        private void BtnUploadRight_Click(object sender, RoutedEventArgs e) => LoadImage(ImgRightPreview);
-        private void BtnUploadBack_Click(object sender, RoutedEventArgs e) => LoadImage(ImgBackPreview);
-
-        // Weekly Progress Pictures
-        private void BtnUploadProgressFrontal_Click(object sender, RoutedEventArgs e) => LoadImage(ImgProgressFrontal);
-        private void BtnUploadProgressLeft_Click(object sender, RoutedEventArgs e) => LoadImage(ImgProgressLeft);
-        private void BtnUploadProgressRight_Click(object sender, RoutedEventArgs e) => LoadImage(ImgProgressRight);
-        private void BtnUploadProgressBack_Click(object sender, RoutedEventArgs e) => LoadImage(ImgProgressBack);
-
-        #endregion
     }
 }

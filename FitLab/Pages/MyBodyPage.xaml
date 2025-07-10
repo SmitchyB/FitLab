@@ -9,233 +9,63 @@
 
     <ScrollViewer>
         <StackPanel Margin="20" Orientation="Vertical" VerticalAlignment="Top">
-
-            <!-- Basic Info -->
-            <GroupBox Header="Basic Information" Margin="0,0,0,10"
-                      Foreground="#9a42ff" BorderThickness="1">
-                <Grid Margin="10">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Name:" VerticalAlignment="Center" Margin="5"/>
-                    <TextBox Grid.Row="0" Grid.Column="1" x:Name="TxtName" Margin="5" Width="300" HorizontalAlignment="Left"/>
-
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Height:" VerticalAlignment="Center" Margin="5"/>
-                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="5">
-                        <TextBox x:Name="TxtHeight" Width="60" Margin="0,0,5,0"/>
-                        <ComboBox x:Name="CmbHeightUnit" Width="80">
-                            <ComboBoxItem Content="cm"/>
-                            <ComboBoxItem Content="feet/in"/>
-                        </ComboBox>
-                    </StackPanel>
-
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Weight:" VerticalAlignment="Center" Margin="5"/>
-                    <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="5">
-                        <TextBox x:Name="TxtWeight" Width="60" Margin="0,0,5,0"/>
-                        <ComboBox x:Name="CmbWeightUnit" Width="80">
-                            <ComboBoxItem Content="kg"/>
-                            <ComboBoxItem Content="lbs"/>
-                        </ComboBox>
-                    </StackPanel>
-                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Date of Birth:" VerticalAlignment="Center" Margin="5"/>
-                    <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="5">
-                        <DatePicker x:Name="DatePickerDOB" Width="150"/>
-                    </StackPanel>
-                </Grid>
-            </GroupBox>
-
-            <!-- Goals -->
-            <GroupBox Header="Goals" Margin="0,0,0,10" Foreground="#9a42ff">
-                <StackPanel Margin="10">
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                        <TextBox x:Name="TxtGoalDescription" Width="300" Margin="0,0,10,0"/>
-                        <TextBox x:Name="TxtGoalTimeframe" Width="100"/>
-                        <Button Content="Add Goal" Click="BtnAddGoal_Click" Margin="10,0,0,0"/>
-                    </StackPanel>
-                    <ItemsControl x:Name="GoalsPanel">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                                    <TextBlock Text="{Binding Description}" Width="300"/>
-                                    <TextBlock Text="{Binding Timeframe}" Width="100" Margin="10,0,0,0"/>
-                                    <Button Content="Edit" Tag="{Binding}" Click="BtnEditGoal_Click" Margin="10,0,0,0"/>
-                                    <Button Content="Delete" Tag="{Binding}" Click="BtnDeleteGoal_Click" Margin="5,0,0,0"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-            </GroupBox>
-
-            <!-- Intake -->
-            <GroupBox Header="Intake" Foreground="#9a42ff" Margin="0,0,0,10">
+            <!-- Basic Information Section -->
+            <Border BorderBrush="#9a42ff" BorderThickness="2" CornerRadius="5" Padding="10" Margin="0,0,0,10">
                 <StackPanel>
+                    <TextBlock Text="Basic Information" FontSize="20" Foreground="#9a42ff" Margin="0,0,0,10"/>
 
-                    <!-- Date Picker -->
+                    <!-- Name -->
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                        <TextBlock Text="Select Date for Food &amp; Water:" VerticalAlignment="Center" Margin="0,0,5,0" Foreground="#9a42ff" />
-                        <DatePicker x:Name="DatePickerSelectedDate"
-                                    SelectedDateChanged="DatePickerSelectedDate_SelectedDateChanged"/>
+                        <TextBlock Text="Name:" Width="120" VerticalAlignment="Center" Foreground="#9a42ff"/>
+                        <TextBox x:Name="TxtName" Width="200" IsReadOnly="True"/>
                     </StackPanel>
 
-                    <!-- Water Intake -->
-                    <GroupBox Header="Water Intake"
-                              Foreground="#9a42ff"
-                              Margin="0,0,0,10">
-                        <StackPanel Orientation="Horizontal">
-                            <Button x:Name="BtnMinusWater"
-                                    Content="-"
-                                    Width="30"
-                                    Height="30"
-                                    Margin="5"
-                                    Click="BtnMinusWater_Click"/>
-                            <TextBlock x:Name="TxtWaterCups"
-                                       FontSize="16"
-                                       VerticalAlignment="Center"
-                                       Margin="10"
-                                       Text="0 cups"/>
-                            <Button x:Name="BtnPlusWater"
-                                    Content="+"
-                                    Width="30"
-                                    Height="30"
-                                    Margin="5"
-                                    Click="BtnPlusWater_Click"/>
-                        </StackPanel>
-                    </GroupBox>
-
-                    <!-- Food Intake -->
-                    <GroupBox Header="Food Intake"
-                              Foreground="#9a42ff"
-                              Margin="0,0,0,10">
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                <ComboBox x:Name="CmbMealTime" Width="100" Margin="0,0,5,0">
-                                    <ComboBoxItem Content="Breakfast"/>
-                                    <ComboBoxItem Content="Brunch"/>
-                                    <ComboBoxItem Content="Lunch"/>
-                                    <ComboBoxItem Content="Snack"/>
-                                    <ComboBoxItem Content="Dinner"/>
-                                </ComboBox>
-                                <TextBox x:Name="TxtDescription" Width="150" Margin="0,0,5,0"/>
-                                <TextBox x:Name="TxtPortionSize" Width="80" Margin="0,0,5,0"/>
-                                <TextBox x:Name="TxtCalories" Width="60" Margin="0,0,5,0"/>
-                                <Button Content="Add Meal" Click="BtnAddMeal_Click"/>
-                            </StackPanel>
-                            <ItemsControl x:Name="FoodIntakePanel">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border BorderBrush="#9a42ff" BorderThickness="1" Padding="5" Margin="5">
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <StackPanel Width="300">
-                                                    <TextBlock Text="{Binding MealTime}" FontWeight="Bold"/>
-                                                    <TextBlock Text="{Binding Description}"/>
-                                                    <TextBlock Text="{Binding PortionSize, StringFormat='Portion: {0}'}"/>
-                                                    <TextBlock Text="{Binding Calories, StringFormat='Calories: {0}'}"/>
-                                                </StackPanel>
-                                                <Button Content="Edit" Tag="{Binding}" Click="BtnEditMeal_Click" Margin="2"/>
-                                                <Button Content="Delete" Tag="{Binding}" Click="BtnDeleteMeal_Click" Margin="2"/>
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
-                    </GroupBox>
-                </StackPanel>
-            </GroupBox>
-            <!-- Before Pictures -->
-            <GroupBox Header="Before Pictures" Margin="0,0,0,10" Foreground="#9a42ff">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <GroupBox Header="Frontal" Margin="10,0">
-                        <StackPanel>
-                            <Border BorderBrush="Gray" BorderThickness="1" Margin="0,5">
-                                <Image x:Name="ImgFrontalPreview" Height="100" Width="100"/>
-                            </Border>
-                            <Button Content="Upload" Click="BtnUploadFrontal_Click"/>
-                        </StackPanel>
-                    </GroupBox>
-                    <GroupBox Header="Left Side" Margin="10,0">
-                        <StackPanel>
-                            <Border BorderBrush="Gray" BorderThickness="1" Margin="0,5">
-                                <Image x:Name="ImgLeftPreview" Height="100" Width="100"/>
-                            </Border>
-                            <Button Content="Upload" Click="BtnUploadLeft_Click"/>
-                        </StackPanel>
-                    </GroupBox>
-                    <GroupBox Header="Right Side" Margin="10,0">
-                        <StackPanel>
-                            <Border BorderBrush="Gray" BorderThickness="1" Margin="0,5">
-                                <Image x:Name="ImgRightPreview" Height="100" Width="100"/>
-                            </Border>
-                            <Button Content="Upload" Click="BtnUploadRight_Click"/>
-                        </StackPanel>
-                    </GroupBox>
-                    <GroupBox Header="Back" Margin="10,0">
-                        <StackPanel>
-                            <Border BorderBrush="Gray" BorderThickness="1" Margin="0,5">
-                                <Image x:Name="ImgBackPreview" Height="100" Width="100"/>
-                            </Border>
-                            <Button Content="Upload" Click="BtnUploadBack_Click"/>
-                        </StackPanel>
-                    </GroupBox>
-                </StackPanel>
-            </GroupBox>
-
-            <!-- Weekly Progress Pictures -->
-            <GroupBox Header="Weekly Progress Pictures" Margin="0,0,0,10" Foreground="#9a42ff">
-                <StackPanel>
-                    <!-- Week Selector -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
-                        <Button Content="◀" Width="40" Click="BtnWeekBack_Click"/>
-                        <TextBlock x:Name="TxtCurrentWeek" Text="Week 1" FontSize="16" VerticalAlignment="Center" Margin="20,0"/>
-                        <Button Content="▶" Width="40" Click="BtnWeekForward_Click"/>
+                    <!-- Gender -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBlock Text="Gender:" Width="120" VerticalAlignment="Center" Foreground="#9a42ff"/>
+                        <ComboBox x:Name="CmbGender" Width="150" SelectionChanged="CmbGender_SelectionChanged" IsEnabled="False">
+                            <ComboBoxItem Content="Male"/>
+                            <ComboBoxItem Content="Female"/>
+                            <ComboBoxItem Content="Trans-Feminine"/>
+                            <ComboBoxItem Content="Trans-Masculine"/>
+                        </ComboBox>
+                        <CheckBox x:Name="ChkOnHormones" Content="On Hormones" Visibility="Collapsed" Margin="10,0,0,0" Foreground="#9a42ff"/>
                     </StackPanel>
 
-                    <!-- Progress Pictures -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <GroupBox Header="Frontal" Margin="10,0">
-                            <StackPanel>
-                                <Border BorderBrush="Gray" BorderThickness="1" Margin="0,5">
-                                    <Image x:Name="ImgProgressFrontal" Height="100" Width="100"/>
-                                </Border>
-                                <Button Content="Upload" Click="BtnUploadProgressFrontal_Click"/>
-                            </StackPanel>
-                        </GroupBox>
-                        <GroupBox Header="Left Side" Margin="10,0">
-                            <StackPanel>
-                                <Border BorderBrush="Gray" BorderThickness="1" Margin="0,5">
-                                    <Image x:Name="ImgProgressLeft" Height="100" Width="100"/>
-                                </Border>
-                                <Button Content="Upload" Click="BtnUploadProgressLeft_Click"/>
-                            </StackPanel>
-                        </GroupBox>
-                        <GroupBox Header="Right Side" Margin="10,0">
-                            <StackPanel>
-                                <Border BorderBrush="Gray" BorderThickness="1" Margin="0,5">
-                                    <Image x:Name="ImgProgressRight" Height="100" Width="100"/>
-                                </Border>
-                                <Button Content="Upload" Click="BtnUploadProgressRight_Click"/>
-                            </StackPanel>
-                        </GroupBox>
-                        <GroupBox Header="Back" Margin="10,0">
-                            <StackPanel>
-                                <Border BorderBrush="Gray" BorderThickness="1" Margin="0,5">
-                                    <Image x:Name="ImgProgressBack" Height="100" Width="100"/>
-                                </Border>
-                                <Button Content="Upload" Click="BtnUploadProgressBack_Click"/>
-                            </StackPanel>
-                        </GroupBox>
+                    <!-- Date of Birth -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBlock Text="Date of Birth:" Width="120" VerticalAlignment="Center" Foreground="#9a42ff"/>
+                        <DatePicker x:Name="DatePickerDOB" IsEnabled="False"/>
+                    </StackPanel>
+
+                    <!-- Height -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBlock Text="Height:" Width="120" VerticalAlignment="Center" Foreground="#9a42ff"/>
+                        <ComboBox x:Name="CmbHeightUnit" Width="120" SelectionChanged="CmbHeightUnit_SelectionChanged" Margin="0,0,10,0">
+                            <ComboBoxItem Content="Centimeters"/>
+                            <ComboBoxItem Content="Inches"/>
+                            <ComboBoxItem Content="Feet/Inches"/>
+                        </ComboBox>
+
+                        <!-- Single Input -->
+                        <StackPanel x:Name="PanelSingleInput" Orientation="Horizontal" Visibility="Collapsed">
+                            <TextBox x:Name="TxtHeightPrimary" Width="100" IsReadOnly="True"/>
+                        </StackPanel>
+
+                        <!-- Feet/Inches Inputs -->
+                        <StackPanel x:Name="PanelFeetInches" Orientation="Horizontal" Visibility="Collapsed">
+                            <TextBlock Text="Feet:" Width="40" VerticalAlignment="Center" Foreground="#9a42ff"/>
+                            <TextBox x:Name="TxtHeightFeet" Width="50" Margin="5,0" IsReadOnly="True"/>
+                            <TextBlock Text="Inches:" Width="50" VerticalAlignment="Center" Foreground="#9a42ff"/>
+                            <TextBox x:Name="TxtHeightInches" Width="50" IsReadOnly="True"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="BtnEdit" Content="Edit" Margin="0,0,10,0" Click="BtnEdit_Click"/>
+                        <Button x:Name="BtnUpdate" Content="Update" Visibility="Collapsed" Click="BtnUpdate_Click"/>
                     </StackPanel>
                 </StackPanel>
-            </GroupBox>
+            </Border>
         </StackPanel>
     </ScrollViewer>
 </Page>

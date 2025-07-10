@@ -17,6 +17,9 @@
     <Compile Update="Pages\SettingsPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Pages\UserIntake.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Pages\WorkoutPlanPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

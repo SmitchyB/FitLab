@@ -2,14 +2,12 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:components="clr-namespace:FitLab.Components"
-        Title="FitLab Main Application"
-        Height="600"
-        Width="900"
-        Background="#000000">
+        Title="FitLab"
+        Height="600" Width="900"
+        Background="Black">
     <DockPanel>
-        <components:HeaderControl DockPanel.Dock="Top"/>
-        <Frame x:Name="MainFrame" x:FieldModifier="public"
-               NavigationUIVisibility="Hidden"
-               Source="Pages/HomePage.xaml"/>
+        <components:HeaderControl x:Name="Header" DockPanel.Dock="Top"/>
+        <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden"/>
     </DockPanel>
 </Window>
+
