@@ -9,27 +9,24 @@ namespace FitLab
 {
     public partial class MainWindow : Window
     {
+        //Main Window constructor
         public MainWindow()
         {
-            InitializeComponent();
+            InitializeComponent(); // Initialize the main window components
 
-            var db = new LocalDatabaseService();
-            var user = db.LoadFirstUser();
+            var db = new LocalDatabaseService(); // Create an instance of the LocalDatabaseService to interact with the database
+            var user = db.LoadFirstUser(); // Load the first user from the database
 
-            if (user != null)
+            if (user != null) // Check if a user was successfully loaded
             {
-                Debug.WriteLine($"[FitLab] MainWindow: Loaded user Id {user.Id}");
-                Header.Visibility = Visibility.Visible;
-                MainFrame.Navigate(new Pages.HomePage());
+                Header.Visibility = Visibility.Visible; // Show the header if a user is loaded
+                MainFrame.Navigate(new Pages.HomePage()); // Navigate to the HomePage if a user is loaded
             }
-            else
+            else // If no user is loaded
             {
-                Debug.WriteLine("[FitLab] MainWindow: No user loaded, showing intake.");
-                Header.Visibility = Visibility.Collapsed;
-                MainFrame.Navigate(new Pages.UserIntake());
+                Header.Visibility = Visibility.Collapsed; // Hide the header
+                MainFrame.Navigate(new Pages.UserIntake()); // Navigate to the UserIntake page to allow user creation
             }
         }
-
-
     }
 }

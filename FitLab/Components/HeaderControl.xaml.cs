@@ -2,73 +2,77 @@
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
 
+/// <summary>
+/// This is the HeaderControl for the FitLab application. 
+/// Displays the header with navigation buttons and a menu toggle with animations.
+/// </summary>
 namespace FitLab.Components
 {
     public partial class HeaderControl : UserControl
     {
-        private bool isMenuVisible = false;
-
+        private bool isMenuVisible = false; // Tracks the visibility state of the menu
+        // Constructor initializes the component and sets up the event handlers.
         public HeaderControl()
         {
-            InitializeComponent();
+            InitializeComponent(); // Initialize the component
         }
-
+        // Event handler for the menu button click event.
         private void MenuButton_Click(object sender, RoutedEventArgs e)
         {
-            if (isMenuVisible)
+            if (isMenuVisible) // If the menu is currently visible, hide it; otherwise, show it.
             {
-                var hide = (Storyboard)this.Resources["HideMenuStoryboard"];
-                hide.Begin();
+                var hide = (Storyboard)this.Resources["HideMenuStoryboard"]; // Retrieve the storyboard for hiding the menu
+                hide.Begin(); // Start the hide animation
             }
-            else
+            else // If the menu is not visible, show it.
             {
-                var show = (Storyboard)this.Resources["ShowMenuStoryboard"];
-                show.Begin();
+                var show = (Storyboard)this.Resources["ShowMenuStoryboard"];// Retrieve the storyboard for showing the menu
+                show.Begin(); // Start the show animation
             }
 
-            isMenuVisible = !isMenuVisible;
+            isMenuVisible = !isMenuVisible; // Toggle the visibility state
         }
-
-        private void NavigateTo(Page page)
+        // Event handler for the navigation buttons click events.
+        private void NavigateTo<T>() where T : Page, new() 
         {
-            var window = Application.Current.MainWindow as MainWindow;
-            window?.MainFrame.Navigate(page);
+            var window = Application.Current.MainWindow as MainWindow; // Get the main window of the application
+            if (window != null) // Check if the main window is not null
+            {
+                if (window.MainFrame.Content is T) // If the current content of the MainFrame is already of type T
+                {
+                    window.MainFrame.Refresh(); // Refresh the current page
+                }
+                else // If the current content is not of type T
+                {
+                    window.MainFrame.Navigate(new T()); // Navigate to the new page of type T
+                }
+            }
         }
-
+        // Event hanlder for the home button click event.
         private void BtnHome_Click(object sender, RoutedEventArgs e)
         {
-            var window = Application.Current.MainWindow as MainWindow;
-            if (window != null)
-            {
-                if (window.MainFrame.Content is FitLab.Pages.HomePage)
-                {
-                    window.MainFrame.Refresh();
-                }
-                else
-                {
-                    window.MainFrame.Navigate(new FitLab.Pages.HomePage());
-                }
-            }
+            NavigateTo<FitLab.Pages.HomePage>(); // Navigate to the HomePage
         }
-
+        // Event handler for the my body button click event.
         private void BtnMyBody_Click(object sender, RoutedEventArgs e)
         {
-            NavigateTo(new FitLab.Pages.MyBodyPage());
+            NavigateTo<FitLab.Pages.MyBodyPage>(); // Navigate to the MyBodyPage
         }
-
+        // Event handler for the my growth button click event.
         private void BtnMyGrowth_Click(object sender, RoutedEventArgs e)
         {
-            NavigateTo(new FitLab.Pages.MyGrowthPage());
+            NavigateTo<FitLab.Pages.MyGrowthPage>(); // Navigate to the MyGrowthPage
         }
-
+        // Event handler for the workout plan button click event.
         private void BtnWorkoutPlan_Click(object sender, RoutedEventArgs e)
         {
-            NavigateTo(new FitLab.Pages.WorkoutPlanPage());
+            NavigateTo<FitLab.Pages.WorkoutPlanPage>(); // Navigate to the WorkoutPlanPage
         }
-
+        // Event handler for the nutrition button click event.
         private void BtnSettings_Click(object sender, RoutedEventArgs e)
         {
-            NavigateTo(new FitLab.Pages.SettingsPage());
+            NavigateTo<FitLab.Pages.SettingsPage>(); // Navigate to the SettingsPage
         }
+
     }
 }

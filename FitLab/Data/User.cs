@@ -1,83 +1,64 @@
 ﻿namespace FitLab.Data
 {
+    // User data model
     public class User
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
-
-        public string Name { get; set; } = string.Empty;
-
-        public string Gender { get; set; } = string.Empty;
-
-        public DateTime DateOfBirth { get; set; }
-
-        public double HeightInches { get; set; }
-
-
-        // Weight history
-        public List<WeightEntry> WeightHistory { get; set; } = new();
-
-        // True when intake is completed
-        public bool CompletedIntake { get; set; }
-
-        // Goals
-        public List<Goal> Goals { get; set; } = new();
-
-        // Daily water intake logs
-        public List<DailyWaterIntake> WaterIntake { get; set; } = new();
-
-        // Daily meals
-        public List<DailyFoodIntake> FoodIntake { get; set; } = new();
-
-        // Before pictures from intake
-        public List<BeforePicture> BeforePictures { get; set; } = new();
-
-        // Weekly progress photos
-        public List<WeeklyProgress> WeeklyProgressPictures { get; set; } = new();
+        public Guid Id { get; set; } = Guid.NewGuid(); // Unique identifier for the user
+        public DateTime CreatedOn { get; set; } = DateTime.UtcNow; // Creation date in UTC
+        public string Name { get; set; } = string.Empty; // User's name
+        public string Gender { get; set; } = string.Empty; // User's Gender
+        public DateTime DateOfBirth { get; set; } // User's date of birth
+        public double HeightInches { get; set; } // User's height in inches
+        public List<WeightEntry> WeightHistory { get; set; } = new(); // User's weight history
+        public bool CompletedIntake { get; set; } // Whether the user has completed the intake process
+        public List<Goal> Goals { get; set; } = new(); // User's fitness goals
+        public List<DailyWaterIntake> WaterIntake { get; set; } = new(); // User's daily water intake records
+        public List<DailyFoodIntake> FoodIntake { get; set; } = new(); // User's daily food intake records
+        public List<WeeklyProgress> WeeklyProgressPictures { get; set; } = new(); // User's weekly progress pictures
     }
-
+    // Weight Entry model for the Weight History
     public class WeightEntry
     {
-        public DateTime Date { get; set; }
-        public double WeightLbs { get; set; }
-        public double WeightKg { get; set; }
+        public DateTime Date { get; set; } // Date of the weight entry
+        public double WeightLbs { get; set; } // Weight in pounds
     }
-
+    // Goal model for the user's fitness goals
     public class Goal
     {
-        public string Description { get; set; } = string.Empty;
-        public string Timeframe { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty; // Description of the goal
+        public string Timeframe { get; set; } = string.Empty; // Timeframe for achieving the goal
     }
-
+    // Daily Water Intake model for tracking water consumption
     public class DailyWaterIntake
     {
-        public DateTime Date { get; set; }
-        public int Cups { get; set; }
+        public DateTime Date { get; set; } // Date of the water intake record
+        public int Cups { get; set; } // Number of cups of water consumed
     }
-
+    // Meal model for tracking daily food intake
     public class Meal
     {
-        public string MealTime { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public string PortionSize { get; set; } = string.Empty;
-        public int Calories { get; set; }
+        public string MealTime { get; set; } = string.Empty; // Time of the meal (e.g., Breakfast, Lunch, Dinner)
+        public string Description { get; set; } = string.Empty; // Description of the meal
+        public string PortionSize { get; set; } = string.Empty; // Portion size of the meal
+        public int Calories { get; set; } // Calories in the meal
     }
-
+    // Daily Food Intake model for tracking meals consumed in a day
     public class DailyFoodIntake
     {
-        public DateTime Date { get; set; }
-        public List<Meal> Meals { get; set; } = new();
+        public DateTime Date { get; set; } // Date of the food intake record
+        public List<Meal> Meals { get; set; } = new(); // List of meals consumed on that day
     }
-
-    public class BeforePicture
+    // ProgressPicture model for tracking before pictures
+    public class ProgressPicture
     {
-        public string FilePath { get; set; } = string.Empty;
-        public DateTime DateTaken { get; set; }
+        public string FilePath { get; set; } = string.Empty; // Path to the picture file
+        public DateTime DateTaken { get; set; } // Date when the picture was taken
         public string Type { get; set; } = string.Empty; // Frontal, Left, Right, Back
     }
-
+    // WeeklyProgress model for tracking weekly progress pictures
     public class WeeklyProgress
     {
-        public int WeekNumber { get; set; }
-        public List<BeforePicture> Pictures { get; set; } = new();
+        public int WeekNumber { get; set; } // Week number in the user's fitness journey
+        public List<ProgressPicture> Pictures { get; set; } = new(); // List of pictures taken for that week
     }
 }
