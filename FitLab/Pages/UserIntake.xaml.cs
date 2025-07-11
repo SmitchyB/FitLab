@@ -130,10 +130,9 @@ namespace FitLab.Pages
         {
             if (CmbHeightUnit.SelectedItem is ComboBoxItem selected) // Check if an item is selected in the combo box
             {
-                var unit = selected.Content?.ToString() ?? ""; // Get the selected item's content as a string
                 double heightInches = 0; // Variable to store the height in inches
 
-                if (unit == "Centimeters") // Check if the selected item is "Centimeters"
+                if (selected.Content?.ToString() == "Centimeters") // Check if the selected item is "Centimeters"
                 {
                     if (double.TryParse(TxtHeightPrimary.Text, out double cm)) // Try to parse the primary height input as a double
                         heightInches = Conversions.CmToInches(cm); // Convert centimeters to inches
@@ -143,7 +142,7 @@ namespace FitLab.Pages
                         return; // Exit the method if parsing fails
                     }
                 }
-                else if (unit == "Inches") // Check if the selected item is "Inches"
+                else if (selected.Content?.ToString() == "Inches") // Check if the selected item is "Inches"
                 {
                     if (double.TryParse(TxtHeightPrimary.Text, out double inches)) // Try to parse the primary height input as a double
                         heightInches = inches; // Set heightInches to the parsed value
@@ -153,7 +152,7 @@ namespace FitLab.Pages
                         return; // Exit the method if parsing fails
                     }
                 }
-                else if (unit == "Feet/Inches") // Check if the selected item is "Feet/Inches"
+                else if (selected.Content?.ToString() == "Feet/Inches") // Check if the selected item is "Feet/Inches"
                 {
                     if (int.TryParse(TxtHeightPrimary.Text, out int feet) && double.TryParse(TxtHeightSecondary.Text, out double inches)) // Try to parse the primary height input as an integer (feet) and the secondary input as a double (inches)
                         heightInches = Conversions.FeetInchesToInches(feet, inches); // Convert feet and inches to total inches
@@ -180,12 +179,11 @@ namespace FitLab.Pages
         {
             if (CmbWeightUnit.SelectedItem is ComboBoxItem selected) // Check if an item is selected in the combo box
             {
-                var unit = selected.Content?.ToString() ?? ""; // Get the selected item's content as a string
-                double weightLbs = 0; // Variable to store the weight in pounds
+                double weightLbs;
 
                 if (double.TryParse(TxtWeight.Text, out double entered)) // Try to parse the weight input as a double
                 {
-                    weightLbs = unit == "Kilograms" ? Conversions.KgToLbs(entered) : entered; // Convert kilograms to pounds if the selected unit is "Kilograms"
+                    weightLbs = selected.Content?.ToString() == "Kilograms" ? Conversions.KgToLbs(entered) : entered; // Convert kilograms to pounds if the selected unit is "Kilograms"
                 }
                 else // If parsing fails
                 {

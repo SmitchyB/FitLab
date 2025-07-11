@@ -33,10 +33,10 @@ namespace FitLab.Components
             isMenuVisible = !isMenuVisible; // Toggle the visibility state
         }
         // Event handler for the navigation buttons click events.
-        private void NavigateTo<T>() where T : Page, new() 
+        private static void NavigateTo<T>() where T : Page, new() 
         {
-            var window = Application.Current.MainWindow as MainWindow; // Get the main window of the application
-            if (window != null) // Check if the main window is not null
+            if (Application.Current.MainWindow is MainWindow window) // Check if the current application window is of type MainWindow
+                if (window != null) // Check if the main window is not null
             {
                 if (window.MainFrame.Content is T) // If the current content of the MainFrame is already of type T
                 {

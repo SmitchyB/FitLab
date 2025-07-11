@@ -12,7 +12,7 @@ namespace FitLab.Pages
     public partial class MyBodyPage : Page
     {
         private readonly LocalDatabaseService _db = new(); // Local database service for loading and saving user data
-        private User _user; // Current user data loaded from the database
+        private readonly User _user;// Current user data loaded from the database
         private int _currentWeightWeek = 0; // Current week number for weight tracking, starting from 0
         private string _currentWeightUnit = "Lbs"; // Current weight unit, defaulting to pounds
 
