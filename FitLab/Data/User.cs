@@ -27,6 +27,7 @@
     {
         public string Description { get; set; } = string.Empty; // Description of the goal
         public string Timeframe { get; set; } = string.Empty; // Timeframe for achieving the goal
+        public DateTime Date { get; set; } // Date when the goal was set
     }
     // Daily Water Intake model for tracking water consumption
     public class DailyWaterIntake
