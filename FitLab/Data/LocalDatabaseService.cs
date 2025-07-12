@@ -12,7 +12,7 @@ namespace FitLab.Data
     {
         private readonly string _dbPath = "FitLabData.db"; // Default database path
 
-        /// Constructor that can take a custom database path
+        // This constructor initializes the database service and ensures the database file exists.
         public void SaveUser(User user)
         {
             using var db = new LiteDatabase(_dbPath); // Open the database file
