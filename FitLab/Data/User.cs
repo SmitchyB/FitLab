@@ -59,7 +59,6 @@
     // WeeklyProgress model for tracking weekly progress pictures
     public class WeeklyProgress
     {
-        public int WeekNumber { get; set; } // Week number in the user's fitness journey
         public List<ProgressPicture> Pictures { get; set; } = new(); // List of pictures taken for that week
     }
 }
