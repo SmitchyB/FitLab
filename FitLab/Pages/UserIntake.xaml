@@ -28,7 +28,6 @@
                     <ComboBoxItem Content="Female"/>
                     <ComboBoxItem Content="Trans-Feminine"/>
                     <ComboBoxItem Content="Trans-Masculine"/>
-                    <ComboBoxItem Content="Other"/>
                 </ComboBox>
                 <CheckBox x:Name="ChkOnHormones" Content="Currently on Hormone Therapy" Visibility="Collapsed" HorizontalAlignment="Center" Margin="0,10,0,0" Foreground="#9a42ff"/>
                 <Button Content="Next" Width="100" Margin="0,10,0,0" HorizontalAlignment="Center" Click="NextGender"/>

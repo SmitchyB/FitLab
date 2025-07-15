@@ -20,7 +20,7 @@ namespace FitLab.Pages
         private readonly User _newUser = new(); // Represents the new user being created during intake
         private readonly List<Goal> _goals = new(); // List of goals added by the user during intake
         private readonly List<ProgressPicture> _intakePictures = new(); // List of progress pictures added by the user during intake
-        private Goal _editingGoal = null;
+        private Goal? _editingGoal = null;
 
         //Initialize the intake page
         public UserIntake()

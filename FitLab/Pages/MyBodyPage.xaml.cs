@@ -16,6 +16,9 @@ namespace FitLab.Pages
         private readonly User _user;// Current user data loaded from the database
         private int _currentWeightWeek = 0; // Current week number for weight tracking, starting from 0
         private string _currentWeightUnit = "Lbs"; // Current weight unit, defaulting to pounds
+        private Goal? _editingGoal = null;// currently editing goal
+        private readonly List<Goal> _goals = new(); // local copy of goals
+
 
         public MyBodyPage()
         {
@@ -50,6 +53,10 @@ namespace FitLab.Pages
             UpdateHeightDisplay(_user.HeightInches); // Update the height display based on the user's height in inches
             PanelFeetInches.Visibility = Visibility.Visible; // Show the Feet/Inches panel
             UpdateWeightDisplay(); // Update the weight display based on the current weight week and unit
+
+            _goals = new List<Goal>(_user.Goals);
+            RefreshGoalsList();
+
         }
         // This method updates the height display based on the selected unit and the user's height in inches.
         private void UpdateHeightDisplay(double heightInches)
@@ -292,5 +299,113 @@ namespace FitLab.Pages
             BtnWeightSave.Visibility = Visibility.Collapsed; // Hide the Save button after saving the weight entry
             UpdateWeightDisplay(); // Update the weight display to reflect the newly saved entry
         }
+        private void RefreshGoalsList()
+        {
+            GoalsList.Items.Clear();
+
+            foreach (var goal in _goals)
+            {
+                string status = FitLab.Components.GoalTimeRemainder.GetTimeRemainingString(goal);
+                GoalsList.Items.Add($"{goal.Description} - {status}");
+            }
+        }
+
+        private void AddOrUpdateGoal(object sender, RoutedEventArgs e)
+        {
+            if (!string.IsNullOrWhiteSpace(TxtGoalDescription.Text)
+                && int.TryParse(TxtGoalTimeframeAmount.Text.Trim(), out int amount)
+                && CmbGoalTimeframeUnit.SelectedItem is ComboBoxItem selectedUnit)
+            {
+                if (_editingGoal == null)
+                {
+                    // Adding new
+                    var goal = new Goal
+                    {
+                        Description = TxtGoalDescription.Text.Trim(),
+                        TimeframeAmount = amount,
+                        TimeframeUnit = selectedUnit.Content?.ToString() ?? "",
+                        Date = DateTime.UtcNow
+                    };
+                    _goals.Add(goal);
+                }
+                else
+                {
+                    // Updating existing
+                    _editingGoal.Description = TxtGoalDescription.Text.Trim();
+                    _editingGoal.TimeframeAmount = amount;
+                    _editingGoal.TimeframeUnit = selectedUnit.Content?.ToString() ?? "";
+                    // Do not touch Date or Completed fields
+                    _editingGoal = null;
+                    BtnAddOrUpdateGoal.Content = "Add Goal";
+                }
+
+                SaveGoals();
+                RefreshGoalsList();
+
+                TxtGoalDescription.Text = "";
+                TxtGoalTimeframeAmount.Text = "";
+                CmbGoalTimeframeUnit.SelectedIndex = -1;
+            }
+            else
+            {
+                MessageBox.Show("Please enter description, amount, and timeframe.");
+            }
+        }
+        private void EditGoal(object sender, RoutedEventArgs e)
+        {
+            if (GoalsList.SelectedIndex >= 0 && GoalsList.SelectedIndex < _goals.Count)
+            {
+                _editingGoal = _goals[GoalsList.SelectedIndex];
+
+                TxtGoalDescription.Text = _editingGoal.Description;
+                TxtGoalTimeframeAmount.Text = _editingGoal.TimeframeAmount.ToString();
+
+                foreach (ComboBoxItem item in CmbGoalTimeframeUnit.Items)
+                {
+                    if (item.Content?.ToString() == _editingGoal.TimeframeUnit)
+                    {
+                        CmbGoalTimeframeUnit.SelectedItem = item;
+                        break;
+                    }
+                }
+
+                BtnAddOrUpdateGoal.Content = "Update Goal";
+            }
+        }
+        private void DeleteGoal(object sender, RoutedEventArgs e)
+        {
+            if (GoalsList.SelectedIndex >= 0 && GoalsList.SelectedIndex < _goals.Count)
+            {
+                // If the goal we're editing is the one being deleted, clear editing state
+                if (_editingGoal == _goals[GoalsList.SelectedIndex])
+                {
+                    _editingGoal = null;
+                    BtnAddOrUpdateGoal.Content = "Add Goal";
+                }
+
+                _goals.RemoveAt(GoalsList.SelectedIndex);
+
+                SaveGoals();
+                RefreshGoalsList();
+            }
+        }
+        private void CompleteGoal(object sender, RoutedEventArgs e)
+        {
+            if (GoalsList.SelectedIndex >= 0 && GoalsList.SelectedIndex < _goals.Count)
+            {
+                var goal = _goals[GoalsList.SelectedIndex];
+                goal.IsCompleted = true;
+                goal.CompletedOn = DateTime.UtcNow;
+
+                SaveGoals();
+                RefreshGoalsList();
+            }
+        }
+        private void SaveGoals()
+        {
+            _user.Goals = _goals;
+            _db.SaveUser(_user);
+        }
+
     }
 }

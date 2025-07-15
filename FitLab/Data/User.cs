@@ -26,9 +26,11 @@
     public class Goal
     {
         public string Description { get; set; } = string.Empty; // Description of the goal
-        public int TimeframeAmount { get; set; }
-        public string TimeframeUnit { get; set; } = string.Empty;
+        public int TimeframeAmount { get; set; } // Amount of time to achieve the goal
+        public string TimeframeUnit { get; set; } = string.Empty; // Timeframe unit for the goal (e.g., days, weeks, months)
         public DateTime Date { get; set; } // Date when the goal was set
+        public bool IsCompleted { get; set; } // Whether the goal has been completed
+        public DateTime? CompletedOn { get; set; } // Date when the goal was completed, if applicable
     }
     // Daily Water Intake model for tracking water consumption
     public class DailyWaterIntake
