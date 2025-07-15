@@ -42,9 +42,15 @@
     public class Meal
     {
         public string MealTime { get; set; } = string.Empty; // Time of the meal (e.g., Breakfast, Lunch, Dinner)
-        public string Description { get; set; } = string.Empty; // Description of the meal
-        public string PortionSize { get; set; } = string.Empty; // Portion size of the meal
-        public int Calories { get; set; } // Calories in the meal
+        public List<Dish> Dishes { get; set; } = new(); // List of dishes consumed in the meal
+    }
+    public class Dish
+    {
+        public string DishName { get; set; } = string.Empty; // Name of the dish
+        public string PortionSize { get; set; } = string.Empty; // Portion size of the dish
+        public string Ingredients { get; set; } = string.Empty; // Ingredients of the dish
+        public int Calories { get; set; } // Calories in the dish
+
     }
     // Daily Food Intake model for tracking meals consumed in a day
     public class DailyFoodIntake

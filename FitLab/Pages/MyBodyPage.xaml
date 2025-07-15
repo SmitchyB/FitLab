@@ -13,13 +13,11 @@
             <Border BorderBrush="#9a42ff" BorderThickness="2" CornerRadius="5" Padding="10" Margin="0,0,0,10">
                 <StackPanel>
                     <TextBlock Text="Basic Information" FontSize="20" Foreground="#9a42ff" Margin="0,0,0,10"/>
-
                     <!-- Name -->
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                         <TextBlock Text="Name:" Width="120" VerticalAlignment="Center" Foreground="#9a42ff"/>
                         <TextBox x:Name="TxtName" Width="200" IsReadOnly="True"/>
                     </StackPanel>
-
                     <!-- Gender -->
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                         <TextBlock Text="Gender:" Width="120" VerticalAlignment="Center" Foreground="#9a42ff"/>
@@ -31,13 +29,11 @@
                         </ComboBox>
                         <CheckBox x:Name="ChkOnHormones" Content="On Hormones" Visibility="Collapsed" Margin="10,0,0,0" Foreground="#9a42ff"/>
                     </StackPanel>
-
                     <!-- Date of Birth -->
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                         <TextBlock Text="Date of Birth:" Width="120" VerticalAlignment="Center" Foreground="#9a42ff"/>
                         <DatePicker x:Name="DatePickerDOB" IsEnabled="False"/>
                     </StackPanel>
-
                     <!-- Height -->
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                         <TextBlock Text="Height:" Width="120" VerticalAlignment="Center" Foreground="#9a42ff"/>
@@ -46,12 +42,10 @@
                             <ComboBoxItem Content="Inches"/>
                             <ComboBoxItem Content="Feet/Inches"/>
                         </ComboBox>
-
                         <!-- Single Input -->
                         <StackPanel x:Name="PanelSingleInput" Orientation="Horizontal" Visibility="Collapsed">
                             <TextBox x:Name="TxtHeightPrimary" Width="100" IsReadOnly="True"/>
                         </StackPanel>
-
                         <!-- Feet/Inches Inputs -->
                         <StackPanel x:Name="PanelFeetInches" Orientation="Horizontal" Visibility="Collapsed">
                             <TextBlock Text="Feet:" Width="40" VerticalAlignment="Center" Foreground="#9a42ff"/>
@@ -73,14 +67,12 @@
                 Margin="0,10,0,0"
                 Padding="10">
                 <StackPanel Orientation="Vertical" VerticalAlignment="Top">
-
                     <!-- Section Header -->
                     <TextBlock Text="Weight Tracking"
                    FontSize="18"
                    FontWeight="Bold"
                    Foreground="#9a42ff"
                    Margin="0,0,0,5"/>
-
                     <!-- Unit Selector -->
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="Display Unit:" VerticalAlignment="Center" Margin="0,0,5,0" Foreground="#9a42ff"/>
@@ -89,7 +81,6 @@
                             <ComboBoxItem>Kilograms</ComboBoxItem>
                         </ComboBox>
                     </StackPanel>
-
                     <!-- Starting Weight -->
                     <TextBlock x:Name="TxtStartingWeight"
                        FontSize="16"
@@ -97,14 +88,12 @@
                        Text="Starting Weight: Not Recorded"
                        Margin="0,5,0,0"
                        Foreground="#9a42ff"/>
-
                     <!-- Week Navigation -->
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,10,0,0">
                         <Button x:Name="BtnWeekBack" Content="&lt;" Width="30" Click="BtnWeightWeekBack_Click"/>
                         <TextBlock x:Name="TxtCurrentWeek" Text="Week 0" Margin="10,0" VerticalAlignment="Center" FontWeight="Bold" Foreground="#9a42ff"/>
                         <Button x:Name="BtnWeekForward" Content="&gt;" Width="30" Click="BtnWeightWeekForward_Click"/>
                     </StackPanel>
-
                     <!-- Weekly Weight Input -->
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,10,0,0">
                         <TextBlock Text="Weight:" VerticalAlignment="Center" Margin="0,0,5,0" Foreground="#9a42ff"/>
@@ -142,6 +131,152 @@
                         </ComboBox>
                     </StackPanel>
                     <Button x:Name="BtnAddOrUpdateGoal" Content="Add Goal" Width="100" Margin="0,10,0,0" Click="AddOrUpdateGoal" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+            <!-- Daily Water Intake-->
+            <Border BorderBrush="#9a42ff" BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,0,10">
+                <StackPanel>
+                    <TextBlock Text="Daily Water Intake" FontSize="16" FontWeight="Bold" Margin="0,0,0,10" Foreground="#9a42ff"/>
+                    <!-- Date Selection -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="◀" Width="30" Click="BtnDateBack_Click"/>
+                        <DatePicker x:Name="DatePickerSelectedDate" SelectedDateChanged="DatePickerSelectedDate_SelectedDateChanged" Width="150" Margin="5,0"/>
+                        <Button Content="▶" Width="30" Click="BtnDateForward_Click"/>
+                    </StackPanel>
+                    <!-- Cup Counter -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Content="-" Width="30" Click="BtnDecreaseCups_Click"/>
+                        <TextBlock x:Name="TxtWaterCups" Text="0 Cup(s)" FontSize="14" VerticalAlignment="Center" Margin="10,0" Foreground="#9a42ff"/>
+                        <Button Content="+" Width="30" Click="BtnIncreaseCups_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+            <!-- Daily Food Intake Section -->
+            <Border BorderBrush="#9a42ff" BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,0,10">
+                <StackPanel>
+                    <TextBlock Text="Daily Food Intake" FontSize="16" FontWeight="Bold" Margin="0,0,0,10" Foreground="#9a42ff"/>
+                    <!-- Date Selection -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="◀" Width="30" Click="BtnFoodDateBack_Click"/>
+                        <DatePicker x:Name="DatePickerFoodDate" SelectedDateChanged="DatePickerFoodDate_SelectedDateChanged" Width="150" Margin="5,0"/>
+                        <Button Content="▶" Width="30" Click="BtnFoodDateForward_Click"/>
+                    </StackPanel>
+                    <!-- Existing Meals List -->
+                    <ListBox x:Name="ListMeals" Margin="0,0,0,10" Height="300">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Expander Header="{Binding MealTime}" Margin="0,0,0,5">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Dishes.Count, StringFormat={}{0} Dish(es)}" FontStyle="Italic" Margin="0,0,0,5"/>
+                                        <!-- Dishes List -->
+                                        <ItemsControl ItemsSource="{Binding Dishes}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Expander Header="{Binding DishName}" Margin="0,0,0,5">
+                                                        <StackPanel>
+                                                            <TextBlock Text="{Binding PortionSize, StringFormat=Portion: {0}}"/>
+                                                            <TextBlock Text="{Binding Ingredients, StringFormat=Ingredients: {0}}"/>
+                                                            <TextBlock Text="{Binding Calories, StringFormat=Calories: {0}}"/>
+                                                        </StackPanel>
+                                                    </Expander>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <!-- Buttons -->
+                                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                            <Button Content="Edit" Width="50" Margin="0,0,5,0" Click="BtnEditMeal_Click"/>
+                                            <Button Content="Delete" Width="50" Click="BtnDeleteMeal_Click"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Expander>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <!-- Add Meal Button -->
+                    <Button Content="Add Meal" Width="100" Click="BtnShowAddMeal_Click" Margin="0,0,0,10"/>
+                    <!-- Add/Edit Meal Section -->
+                    <StackPanel x:Name="PanelAddMeal" Visibility="Collapsed">
+                        <!-- Meal Time Dropdown -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <TextBlock Text="Meal Time:" VerticalAlignment="Center" Margin="0,0,5,0" Foreground="#9a42ff"/>
+                            <ComboBox x:Name="CmbMealTime" Width="150">
+                                <ComboBoxItem Content="Breakfast"/>
+                                <ComboBoxItem Content="Brunch"/>
+                                <ComboBoxItem Content="Lunch"/>
+                                <ComboBoxItem Content="Snack"/>
+                                <ComboBoxItem Content="Dinner"/>
+                                <ComboBoxItem Content="Dessert"/>
+                            </ComboBox>
+                        </StackPanel>
+                        <!-- Dishes List -->
+                        <ItemsControl x:Name="PanelDishes">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#9a42ff" BorderThickness="1" Padding="5" Margin="0,0,0,5">
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                                <TextBlock Text="Dish Name:" Width="70" Foreground="#9a42ff"/>
+                                                <TextBox Width="150" Text="{Binding DishName, Mode=TwoWay}"/>
+                                                <Button Content="-" Width="30" Margin="5,0,0,0" Click="BtnRemoveDish_Click"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                                <TextBlock Text="Portion:" Width="70" Foreground="#9a42ff"/>
+                                                <TextBox Width="150" Text="{Binding PortionSize, Mode=TwoWay}"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                                <TextBlock Text="Ingredients:" Width="70" Foreground="#9a42ff"/>
+                                                <TextBox Width="150" Text="{Binding Ingredients, Mode=TwoWay}"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="Calories:" Width="70" Foreground="#9a42ff"/>
+                                                <TextBox Width="150" Text="{Binding Calories, Mode=TwoWay}"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <!-- Add Dish Button -->
+                        <Button Content="Add Dish" Width="100" Margin="0,0,0,10" Click="BtnAddDish_Click"/>
+                        <!-- Save Meal Button -->
+                        <Button Content="Save Meal" Width="100" Click="BtnSaveMeal_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+            <!-- Weekly Progress Pictures Section -->
+            <Border BorderBrush="#9a42ff" BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,0,10">
+                <StackPanel>
+                    <!-- Section Header -->
+                    <TextBlock Text="Weekly Progress Pictures" FontSize="16" FontWeight="Bold" Margin="0,0,0,10" Foreground="#9a42ff"/>
+                    <!-- BEFORE PICTURES -->
+                    <TextBlock Text="Before Pictures:" FontSize="14" Margin="0,0,0,5" Foreground="#9a42ff"/>
+                    <WrapPanel x:Name="PanelBeforePictures" Margin="0,0,0,10"></WrapPanel>
+                    <!-- CURRENT WEEK PICTURES -->
+                    <TextBlock Text="Weekly Progress Pictures:" FontSize="14" Margin="0,0,0,5" Foreground="#9a42ff"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10" HorizontalAlignment="Center">
+                        <Button Content="◀" Width="30" Click="BtnPictureWeekBack_Click"/>
+                        <TextBlock x:Name="TxtCurrentPictureWeek" Text="Week 0" FontWeight="Bold" VerticalAlignment="Center" Margin="5,0" Foreground="#9a42ff"/>
+                        <Button Content="▶" Width="30" Click="BtnPictureWeekForward_Click"/>
+                    </StackPanel>
+                    <!-- Picture Upload Buttons and Picture Previews-->
+                    <WrapPanel x:Name="PanelCurrentWeekPictures">
+                        <StackPanel Margin="5">
+                            <Button x:Name="BtnUploadFrontal" Content="Upload Frontal" Width="120" Height="30" Click="BtnUploadFrontal_Click"/>
+                            <Image x:Name="ImgFrontalPreview" Width="120" Height="120" Stretch="Uniform" Visibility="Collapsed" Margin="0,5,0,0"/>
+                        </StackPanel>
+                        <StackPanel Margin="5">
+                            <Button x:Name="BtnUploadLeft" Content="Upload Left" Width="120" Height="30" Click="BtnUploadLeft_Click"/>
+                            <Image x:Name="ImgLeftPreview" Width="120" Height="120" Stretch="Uniform" Visibility="Collapsed" Margin="0,5,0,0"/>
+                        </StackPanel>
+                        <StackPanel Margin="5">
+                            <Button x:Name="BtnUploadRight" Content="Upload Right" Width="120" Height="30" Click="BtnUploadRight_Click"/>
+                            <Image x:Name="ImgRightPreview" Width="120" Height="120" Stretch="Uniform" Visibility="Collapsed" Margin="0,5,0,0"/>
+                        </StackPanel>
+                        <StackPanel Margin="5">
+                            <Button x:Name="BtnUploadBack" Content="Upload Back" Width="120" Height="30" Click="BtnUploadBack_Click"/>
+                            <Image x:Name="ImgBackPreview" Width="120" Height="120" Stretch="Uniform" Visibility="Collapsed" Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </WrapPanel>
                 </StackPanel>
             </Border>
         </StackPanel>

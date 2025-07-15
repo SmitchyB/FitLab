@@ -1,8 +1,10 @@
 ﻿using FitLab.AppState;
 using FitLab.Data;
 using System;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 
 namespace FitLab.Pages
 {
@@ -18,8 +20,11 @@ namespace FitLab.Pages
         private string _currentWeightUnit = "Lbs"; // Current weight unit, defaulting to pounds
         private Goal? _editingGoal = null;// currently editing goal
         private readonly List<Goal> _goals = new(); // local copy of goals
-
-
+        private ObservableCollection<Dish> _currentEditingDishes = new();
+        private Meal? _mealBeingEdited = null;
+        private readonly string _uploadsFolder = @"A:\DotNetApps\FitLab\FitLab\Uploads";
+        private WeeklyProgress? _currentWeekProgress = null;
+        private int _currentPictureWeek = 0;
         public MyBodyPage()
         {
             InitializeComponent(); // Initialize the page components
@@ -53,10 +58,14 @@ namespace FitLab.Pages
             UpdateHeightDisplay(_user.HeightInches); // Update the height display based on the user's height in inches
             PanelFeetInches.Visibility = Visibility.Visible; // Show the Feet/Inches panel
             UpdateWeightDisplay(); // Update the weight display based on the current weight week and unit
-
-            _goals = new List<Goal>(_user.Goals);
-            RefreshGoalsList();
-
+            _goals = new List<Goal>(_user.Goals); // Load goals from the user data
+            RefreshGoalsList(); // Refresh the goals list to display current goals
+            DatePickerSelectedDate.SelectedDate = DateTime.Today; // Set the selected date for water intake to today
+            LoadWaterIntakeForDate(DateTime.Today); // Load water intake for today
+            DatePickerFoodDate.SelectedDate = DateTime.Today; // Set the selected date for food intake to today
+            LoadMealsForDate(DateTime.Today); // Load meals for today
+            LoadBeforePictures(); // Load before pictures for the user
+            LoadCurrentPictureWeek(); // Load the current picture week to display progress pictures
         }
         // This method updates the height display based on the selected unit and the user's height in inches.
         private void UpdateHeightDisplay(double heightInches)
@@ -299,113 +308,523 @@ namespace FitLab.Pages
             BtnWeightSave.Visibility = Visibility.Collapsed; // Hide the Save button after saving the weight entry
             UpdateWeightDisplay(); // Update the weight display to reflect the newly saved entry
         }
+        // Refreshes the goals list displayed in the UI.
         private void RefreshGoalsList()
         {
-            GoalsList.Items.Clear();
+            GoalsList.Items.Clear(); // Clear the existing items in the goals list
 
-            foreach (var goal in _goals)
+            foreach (var goal in _goals) // Iterate through each goal in the user's goals
             {
-                string status = FitLab.Components.GoalTimeRemainder.GetTimeRemainingString(goal);
-                GoalsList.Items.Add($"{goal.Description} - {status}");
+                string status = FitLab.Components.GoalTimeRemainder.GetTimeRemainingString(goal); // Get the time remaining for the goal as a string
+                GoalsList.Items.Add($"{goal.Description} - {status}"); // Add the goal description and status to the goals list
             }
         }
-
+        // Event handler for adding or updating a goal.
         private void AddOrUpdateGoal(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrWhiteSpace(TxtGoalDescription.Text)
-                && int.TryParse(TxtGoalTimeframeAmount.Text.Trim(), out int amount)
-                && CmbGoalTimeframeUnit.SelectedItem is ComboBoxItem selectedUnit)
+            if (!string.IsNullOrWhiteSpace(TxtGoalDescription.Text) // Check if the goal description is not empty
+                && int.TryParse(TxtGoalTimeframeAmount.Text.Trim(), out int amount) // Try to parse the timeframe amount as an integer
+                && CmbGoalTimeframeUnit.SelectedItem is ComboBoxItem selectedUnit) // Check if a timeframe unit is selected
             {
-                if (_editingGoal == null)
+                if (_editingGoal == null) // If we are not currently editing an existing goal
                 {
-                    // Adding new
-                    var goal = new Goal
+                    var goal = new Goal // Create a new goal object
                     {
-                        Description = TxtGoalDescription.Text.Trim(),
-                        TimeframeAmount = amount,
-                        TimeframeUnit = selectedUnit.Content?.ToString() ?? "",
-                        Date = DateTime.UtcNow
+                        Description = TxtGoalDescription.Text.Trim(), // Set the goal description
+                        TimeframeAmount = amount, // Set the timeframe amount
+                        TimeframeUnit = selectedUnit.Content?.ToString() ?? "", // Set the timeframe unit
+                        Date = DateTime.UtcNow // Set the date to the current UTC time
                     };
-                    _goals.Add(goal);
+                    _goals.Add(goal); // Add the new goal to the local goals list
                 }
-                else
+                else // If we are editing an existing goal
                 {
-                    // Updating existing
-                    _editingGoal.Description = TxtGoalDescription.Text.Trim();
-                    _editingGoal.TimeframeAmount = amount;
-                    _editingGoal.TimeframeUnit = selectedUnit.Content?.ToString() ?? "";
-                    // Do not touch Date or Completed fields
-                    _editingGoal = null;
-                    BtnAddOrUpdateGoal.Content = "Add Goal";
+                    _editingGoal.Description = TxtGoalDescription.Text.Trim(); // Update the goal description
+                    _editingGoal.TimeframeAmount = amount; // Update the timeframe amount
+                    _editingGoal.TimeframeUnit = selectedUnit.Content?.ToString() ?? ""; // Update the timeframe unit
+                    _editingGoal = null; // Clear the editing state
+                    BtnAddOrUpdateGoal.Content = "Add Goal"; // Reset the button text to "Add Goal"
                 }
-
-                SaveGoals();
-                RefreshGoalsList();
-
-                TxtGoalDescription.Text = "";
-                TxtGoalTimeframeAmount.Text = "";
-                CmbGoalTimeframeUnit.SelectedIndex = -1;
+                SaveGoals(); // Save the updated goals to the database
+                RefreshGoalsList(); // Refresh the goals list to display the updated goals
+                TxtGoalDescription.Text = ""; // Clear the goal description input field
+                TxtGoalTimeframeAmount.Text = ""; // Clear the timeframe amount input field
+                CmbGoalTimeframeUnit.SelectedIndex = -1; // Reset the timeframe unit selection to none
             }
-            else
+            else // If any of the required fields are empty or invalid
             {
-                MessageBox.Show("Please enter description, amount, and timeframe.");
+                MessageBox.Show("Please enter description, amount, and timeframe."); // Show an error message prompting the user to fill in the required fields
             }
         }
-        private void EditGoal(object sender, RoutedEventArgs e)
+        // Event handler for editing a selected goal from the goals list.
+        private void EditGoal(object sender, RoutedEventArgs e) 
         {
-            if (GoalsList.SelectedIndex >= 0 && GoalsList.SelectedIndex < _goals.Count)
+            if (GoalsList.SelectedIndex >= 0 && GoalsList.SelectedIndex < _goals.Count) // Check if a goal is selected in the goals list
             {
-                _editingGoal = _goals[GoalsList.SelectedIndex];
+                _editingGoal = _goals[GoalsList.SelectedIndex]; // Set the editing goal to the selected goal
 
-                TxtGoalDescription.Text = _editingGoal.Description;
-                TxtGoalTimeframeAmount.Text = _editingGoal.TimeframeAmount.ToString();
+                TxtGoalDescription.Text = _editingGoal.Description; // Populate the goal description input field with the selected goal's description
+                TxtGoalTimeframeAmount.Text = _editingGoal.TimeframeAmount.ToString(); // Populate the timeframe amount input field with the selected goal's timeframe amount
 
-                foreach (ComboBoxItem item in CmbGoalTimeframeUnit.Items)
+                foreach (ComboBoxItem item in CmbGoalTimeframeUnit.Items) // Iterate through the items in the timeframe unit combo box
                 {
-                    if (item.Content?.ToString() == _editingGoal.TimeframeUnit)
+                    if (item.Content?.ToString() == _editingGoal.TimeframeUnit) // Check if the item's content matches the selected goal's timeframe unit
                     {
-                        CmbGoalTimeframeUnit.SelectedItem = item;
-                        break;
+                        CmbGoalTimeframeUnit.SelectedItem = item; // Set the selected item in the combo box to the matching item
+                        break; // Exit the loop once the matching item is found
                     }
                 }
 
-                BtnAddOrUpdateGoal.Content = "Update Goal";
+                BtnAddOrUpdateGoal.Content = "Update Goal"; // Change the button text to "Update Goal" to indicate that we are editing an existing goal
             }
         }
-        private void DeleteGoal(object sender, RoutedEventArgs e)
+        // Event handler for deleting a selected goal from the goals list.
+        private void DeleteGoal(object sender, RoutedEventArgs e) 
         {
-            if (GoalsList.SelectedIndex >= 0 && GoalsList.SelectedIndex < _goals.Count)
+            if (GoalsList.SelectedIndex >= 0 && GoalsList.SelectedIndex < _goals.Count) // Check if a goal is selected in the goals list
             {
-                // If the goal we're editing is the one being deleted, clear editing state
-                if (_editingGoal == _goals[GoalsList.SelectedIndex])
+                var result = MessageBox.Show("Are you sure you want to delete this goal?", "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning); // Show confirmation dialog
+                if (result != MessageBoxResult.Yes) return; // If the user did not confirm, exit the method
+                if (_editingGoal == _goals[GoalsList.SelectedIndex]) // If the goal being edited is the one selected for deletion
                 {
-                    _editingGoal = null;
-                    BtnAddOrUpdateGoal.Content = "Add Goal";
+                    _editingGoal = null; // Clear the editing state
+                    BtnAddOrUpdateGoal.Content = "Add Goal"; // Reset the button text to "Add Goal"
                 }
 
-                _goals.RemoveAt(GoalsList.SelectedIndex);
+                _goals.RemoveAt(GoalsList.SelectedIndex); // Remove the selected goal from the local goals list
 
-                SaveGoals();
-                RefreshGoalsList();
+                SaveGoals(); // Save the updated goals to the database
+                RefreshGoalsList(); // Refresh the goals list to display the updated goals
             }
         }
+        // Event handler for completing a selected goal from the goals list.
         private void CompleteGoal(object sender, RoutedEventArgs e)
         {
-            if (GoalsList.SelectedIndex >= 0 && GoalsList.SelectedIndex < _goals.Count)
+            if (GoalsList.SelectedIndex >= 0 && GoalsList.SelectedIndex < _goals.Count) // Check if a goal is selected in the goals list
             {
-                var goal = _goals[GoalsList.SelectedIndex];
-                goal.IsCompleted = true;
-                goal.CompletedOn = DateTime.UtcNow;
+                var goal = _goals[GoalsList.SelectedIndex]; // Get the selected goal from the local goals list
+                goal.IsCompleted = true; // Mark the goal as completed
+                goal.CompletedOn = DateTime.UtcNow; // Set the completion date to the current UTC time
 
-                SaveGoals();
-                RefreshGoalsList();
+                SaveGoals(); // Save the updated goals to the database
+                RefreshGoalsList(); // Refresh the goals list to display the updated goals
             }
         }
+        //Helper method for saving the goals to the user data and database.
         private void SaveGoals()
         {
-            _user.Goals = _goals;
-            _db.SaveUser(_user);
+            _user.Goals = _goals; // Update the user's goals with the local goals list
+            _db.SaveUser(_user); // Save the updated user data to the database
         }
+        // Event handler for the Date picker back button
+        private void BtnDateBack_Click(object sender, RoutedEventArgs e)
+        {
+            if (DatePickerSelectedDate.SelectedDate.HasValue) // Check if a date is selected in the date picker
+                DatePickerSelectedDate.SelectedDate = DatePickerSelectedDate.SelectedDate.Value.AddDays(-1); // Move the selected date back by one day
+        }
+        //Event handler for the Date picker forward button
+        private void BtnDateForward_Click(object sender, RoutedEventArgs e)
+        {
+            if (DatePickerSelectedDate.SelectedDate.HasValue) // Check if a date is selected in the date picker
+                DatePickerSelectedDate.SelectedDate = DatePickerSelectedDate.SelectedDate.Value.AddDays(1); // Move the selected date forward by one day
+        }
+        // Event handler for the Date picker selection change
+        private void DatePickerSelectedDate_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            LoadWaterIntakeForDate(DatePickerSelectedDate.SelectedDate ?? DateTime.Today); // Load the water intake for the selected date or default to today if no date is selected
+        }
+        // This method loads the water intake for a specific date and updates the UI accordingly.
+        private void LoadWaterIntakeForDate(DateTime date)
+        {
+            var entry = _user.WaterIntake.FirstOrDefault(w => w.Date.Date == date.Date); // Find the water intake entry for the selected date
+            int cups = entry?.Cups ?? 0; // Get the number of cups consumed on that date, defaulting to 0 if no entry exists
+            TxtWaterCups.Text = $"{cups} Cup(s)"; // Update the water cups text with the number of cups consumed on that date
+        }
+        // Event handler for increasing the water cups count
+        private void BtnIncreaseCups_Click(object sender, RoutedEventArgs e)
+        {
+            AdjustCups(1); // Call the AdjustCups method with a delta of 1 to increase the cups count
+        }
+        // Event handler for decreasing the water cups count
+        private void BtnDecreaseCups_Click(object sender, RoutedEventArgs e)
+        {
+            AdjustCups(-1); // Call the AdjustCups method with a delta of -1 to decrease the cups count
+        }
+        // This method adjusts the water cups count for the selected date by a specified delta (positive or negative).
+        private void AdjustCups(int delta)
+        {
+            var date = DatePickerSelectedDate.SelectedDate ?? DateTime.Today; // Get the selected date from the date picker or default to today if no date is selected
+            var entry = _user.WaterIntake.FirstOrDefault(w => w.Date.Date == date.Date); // Find the water intake entry for the selected date
 
+            if (entry == null) // If no entry exists for the selected date
+            {
+                entry = new DailyWaterIntake // Create a new DailyWaterIntake entry for the selected date
+                {
+                    Date = date.Date, // Set the date to the selected date
+                    Cups = 0 // Initialize the cups count to 0
+                };
+                _user.WaterIntake.Add(entry); // Add the new entry to the user's water intake list
+            }
+
+            entry.Cups = Math.Max(0, entry.Cups + delta); // Update the cups count by adding the delta, ensuring it does not go below 0
+            TxtWaterCups.Text = $"{entry.Cups} Cup(s)"; // Update the water cups text with the new cups count
+            _db.SaveUser(_user); // Save the updated user data to the database
+        }
+        // Event handler for navigating backwards through food intake dates
+        private void BtnFoodDateBack_Click(object sender, RoutedEventArgs e)
+        {
+            if (DatePickerFoodDate.SelectedDate.HasValue) // Check if a date is selected in the food date picker
+                DatePickerFoodDate.SelectedDate = DatePickerFoodDate.SelectedDate.Value.AddDays(-1); // Move the selected date back by one day
+        }
+        //Event handler for navigating forwards through food intake dates
+        private void BtnFoodDateForward_Click(object sender, RoutedEventArgs e)
+        {
+            if (DatePickerFoodDate.SelectedDate.HasValue) // Check if a date is selected in the food date picker
+                DatePickerFoodDate.SelectedDate = DatePickerFoodDate.SelectedDate.Value.AddDays(1); // Move the selected date forward by one day
+        }
+        // Event handler for the food date picker selection change
+        private void DatePickerFoodDate_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            LoadMealsForDate(DatePickerFoodDate.SelectedDate ?? DateTime.Today); // Load the meals for the selected date or default to today if no date is selected
+        }
+        // This method loads the meals for a specific date and updates the UI accordingly.
+        private void LoadMealsForDate(DateTime date)
+        {
+            var entry = _user.FoodIntake.FirstOrDefault(x => x.Date.Date == date.Date); // Find the food intake entry for the selected date
+            if (entry != null) // If an entry exists for the selected date
+            {
+                ListMeals.ItemsSource = entry.Meals; // Set the ItemsSource of the ListMeals control to the meals for that date
+            }
+            else // If no entry exists for the selected date
+            {
+                ListMeals.ItemsSource = null; // Clear the ItemsSource of the ListMeals control
+            }
+        }
+        // Event handler for showing the Add Meal panel
+        private void BtnShowAddMeal_Click(object sender, RoutedEventArgs e)
+        {
+            _mealBeingEdited = null; // Reset the meal being edited to null
+            _currentEditingDishes = new ObservableCollection<Dish>(); // Initialize the current editing dishes collection to an empty ObservableCollection
+            PanelDishes.ItemsSource = _currentEditingDishes; // Set the ItemsSource of the PanelDishes control to the current editing dishes collection
+            CmbMealTime.SelectedIndex = -1; // Reset the selected meal time in the ComboBox to none
+            PanelAddMeal.Visibility = Visibility.Visible; // Show the Add Meal panel
+        }
+        // Event handlers for adding and dishes in the Add Meal panel
+        private void BtnAddDish_Click(object sender, RoutedEventArgs e)
+        {
+            _currentEditingDishes.Add(new Dish()); // Add a new Dish object to the current editing dishes collection
+        }
+        // Event handler for removing a dish from the Add Meal panel
+        private void BtnRemoveDish_Click(object sender, RoutedEventArgs e)
+        {
+            var dish = ((FrameworkElement)sender).DataContext as Dish; // Get the Dish object from the DataContext of the clicked element
+            if (dish != null) // If the dish is not null
+            {
+                _currentEditingDishes.Remove(dish); // Remove the dish from the current editing dishes collection
+            }
+        }
+        // Event handler for saving a meal in the Add Meal panel
+        private void BtnSaveMeal_Click(object sender, RoutedEventArgs e)
+        {
+            if (CmbMealTime.SelectedItem is not ComboBoxItem selectedItem) // Check if a meal time is selected in the ComboBox
+            {
+                MessageBox.Show("Select a meal time."); // Show an error message if no meal time is selected
+                return; // Exit the method if no meal time is selected
+            }
+
+            string mealTime = selectedItem.Content?.ToString() ?? ""; // Get the selected meal time as a string, defaulting to an empty string if not found
+            var date = DatePickerFoodDate.SelectedDate ?? DateTime.Today; // Get the selected date from the food date picker or default to today if no date is selected
+
+            var entry = _user.FoodIntake.FirstOrDefault(x => x.Date.Date == date.Date); // Find the food intake entry for the selected date
+            if (entry == null) // If no entry exists for the selected date
+            {
+                entry = new DailyFoodIntake // Create a new DailyFoodIntake entry for the selected date
+                {
+                    Date = date.Date, // Set the date to the selected date
+                    Meals = new List<Meal>() // Initialize the meals list to an empty list
+                };
+                _user.FoodIntake.Add(entry); // Add the new entry to the user's food intake list
+            }
+
+            if (_mealBeingEdited != null) // If we are editing an existing meal
+            {
+                _mealBeingEdited.MealTime = mealTime; // Update the meal time of the meal being edited
+                _mealBeingEdited.Dishes = _currentEditingDishes.ToList(); // Update the dishes of the meal being edited with the current editing dishes collection
+            }
+            else // If we are adding a new meal
+            {
+                entry.Meals.Add(new Meal // Create a new Meal object and add it to the meals list of the entry
+                {
+                    MealTime = mealTime, // Set the meal time to the selected meal time
+                    Dishes = _currentEditingDishes.ToList() // Set the dishes of the meal to the current editing dishes collection
+                });
+            }
+
+            _db.SaveUser(_user); // Save the updated user data to the database
+
+            PanelAddMeal.Visibility = Visibility.Collapsed; // Hide the Add Meal panel
+            _mealBeingEdited = null; // Reset the meal being edited to null
+
+            LoadMealsForDate(date); // Reload the meals for the selected date to reflect the changes made
+        }
+        // Event handlers for editing and deleting meals in the ListMeals control
+        private void BtnEditMeal_Click(object sender, RoutedEventArgs e)
+        {
+            var meal = ((FrameworkElement)sender).DataContext as Meal; // Get the Meal object from the DataContext of the clicked element
+            if (meal == null) return; // If the meal is null, exit the method
+
+            _mealBeingEdited = meal; // Set the meal being edited to the selected meal
+            _currentEditingDishes = new ObservableCollection<Dish>(meal.Dishes); // Initialize the current editing dishes collection with the dishes of the selected meal
+            PanelDishes.ItemsSource = _currentEditingDishes; // Set the ItemsSource of the PanelDishes control to the current editing dishes collection
+
+            foreach (ComboBoxItem item in CmbMealTime.Items) // Iterate through the items in the meal time ComboBox
+            {
+                if ((item.Content?.ToString() ?? "") == meal.MealTime) // Check if the item's content matches the meal time of the selected meal
+                {
+                    CmbMealTime.SelectedItem = item; // Set the selected item in the ComboBox to the matching item
+                    break; // Exit the loop once the matching item is found
+                }
+            }
+
+            PanelAddMeal.Visibility = Visibility.Visible; // Show the Add Meal panel to allow editing of the selected meal
+        }
+        // Event handler for deleting a meal from the ListMeals control
+        private void BtnDeleteMeal_Click(object sender, RoutedEventArgs e)
+        {
+            var meal = ((FrameworkElement)sender).DataContext as Meal; // Get the Meal object from the DataContext of the clicked element
+            if (meal == null) return; // If the meal is null, exit the method
+
+            var date = DatePickerFoodDate.SelectedDate ?? DateTime.Today; // Get the selected date from the food date picker or default to today if no date is selected
+            var entry = _user.FoodIntake.FirstOrDefault(x => x.Date.Date == date.Date); // Find the food intake entry for the selected date
+            if (entry != null) // If an entry exists for the selected date
+            {
+                entry.Meals.Remove(meal); // Remove the selected meal from the meals list of the entry
+                _db.SaveUser(_user); // Save the updated user data to the database
+                LoadMealsForDate(date); // Reload the meals for the selected date to reflect the changes made
+            }
+        }
+        // Event handler for loading the Before pictures when the page is loaded
+        private void LoadBeforePictures()
+        {
+            PanelBeforePictures.Children.Clear(); // Clear any existing pictures in the Before Pictures panel
+
+            if (_user.WeeklyProgressPictures.Count > 0) // Check if there are any weekly progress pictures
+            {
+                var beforeProgress = _user.WeeklyProgressPictures[0]; // Get the first weekly progress pictures (which is considered "Before" pictures)
+                foreach (var pic in beforeProgress.Pictures) // Iterate through each picture in the before progress
+                {
+                    var img = new Image //Create a new Image control for each picture
+                    {
+                        Width = 120, // Set the width of the image
+                        Height = 120, // Set the height of the image
+                        Margin = new Thickness(5), // Set the margin around the image
+                        Stretch = System.Windows.Media.Stretch.Uniform, // Set the stretch mode to uniform to maintain aspect ratio
+                        Source = new BitmapImage(new Uri(pic.FilePath)) // Set the source of the image to the file path of the picture
+                    };
+                    PanelBeforePictures.Children.Add(img); // Add the image to the Before Pictures panel
+                }
+            }
+        }
+        // Event handler for the Picture Week Back button click
+        private void BtnPictureWeekBack_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentPictureWeek > 0) // Ensure we don't go back past week 0
+                _currentPictureWeek--; // Decrement the current picture week
+
+            LoadCurrentPictureWeek(); // Load the current picture week to update the UI
+        }
+        // Event handler for the Picture Week Forward button click
+        private void BtnPictureWeekForward_Click(object sender, RoutedEventArgs e)
+        {
+            _currentPictureWeek++; // Increment the current picture week
+            LoadCurrentPictureWeek(); // Load the current picture week to update the UI
+        }
+        // This method loads the current picture week and updates the UI accordingly.
+        private void LoadCurrentPictureWeek()
+        {
+            TxtCurrentPictureWeek.Text = $"Week {_currentPictureWeek}"; // Display the current picture week
+
+            ResetCurrentWeekUI(); // Reset the UI for the current week to its default state
+
+            if (_currentPictureWeek == 0) // If the current picture week is 0 (Before pictures set in user intake)
+            {
+                if (_user.WeeklyProgressPictures.Count > 0) // Check if there are any weekly progress pictures
+                {
+                    var beforeProgress = _user.WeeklyProgressPictures[0]; // Get the first weekly progress pictures
+                    foreach (var pic in beforeProgress.Pictures)   // Iterate through each picture in the before progress
+                    {
+                        ShowPicturePreview(pic.Type, pic.FilePath); // Show the picture preview for each picture
+                    }
+                }
+                BtnUploadFrontal.Visibility = Visibility.Collapsed; // Hide the Frontal upload button
+                BtnUploadLeft.Visibility = Visibility.Collapsed; // Hide the Left upload button
+                BtnUploadRight.Visibility = Visibility.Collapsed; // Hide the Right upload button
+                BtnUploadBack.Visibility = Visibility.Collapsed; // Hide the Back upload button
+                return; // Exit the method
+            }
+
+            if (_user.WeeklyProgressPictures.Count > _currentPictureWeek) //Check if there are pictures for the current week
+            {
+                _currentWeekProgress = _user.WeeklyProgressPictures[_currentPictureWeek]; // Get the weekly progress pictures for the current week
+            }
+            else // If no pictures exist for the current week
+            {
+                _currentWeekProgress = new WeeklyProgress(); // Create a new WeeklyProgress object for the current week
+            }
+
+            foreach (var pic in _currentWeekProgress.Pictures) //Iterate through each picture in the current week's progress
+            {
+                ShowPicturePreview(pic.Type, pic.FilePath); // Show the picture preview for each picture
+                HideUploadButton(pic.Type); // Hide the upload button for the picture type that has already been uploaded
+            }
+
+            if (_currentPictureWeek != SessionState.CurrentWeek) // If the current picture week is not the current session week
+            {
+                BtnUploadFrontal.Visibility = Visibility.Collapsed; // Hide the Frontal upload button
+                BtnUploadLeft.Visibility = Visibility.Collapsed; // Hide the Left upload button
+                BtnUploadRight.Visibility = Visibility.Collapsed; // Hide the Right upload button
+                BtnUploadBack.Visibility = Visibility.Collapsed; // Hide the Back upload button
+            }
+            else // If the current picture week is the current session week
+            {
+                if (!BtnUploadFrontal.IsVisible) // Check if the Frontal upload button is not visible
+                    BtnUploadFrontal.Visibility = Visibility.Visible; // Show the Frontal upload button
+                if (!BtnUploadLeft.IsVisible) // Check if the Left upload button is not visible
+                    BtnUploadLeft.Visibility = Visibility.Visible; // Show the Left upload button
+                if (!BtnUploadRight.IsVisible) // Check if the Right upload button is not visible
+                    BtnUploadRight.Visibility = Visibility.Visible; // Show the Right upload button
+                if (!BtnUploadBack.IsVisible) // Check if the Back upload button is not visible
+                    BtnUploadBack.Visibility = Visibility.Visible; // Show the Back upload button
+            }
+        }
+        // This method hides the upload button for a specific picture type.
+        private void HideUploadButton(string type)
+        {
+            switch (type) // Check the type of picture and hide the corresponding upload button
+            {
+                case "Frontal": 
+                    BtnUploadFrontal.Visibility = Visibility.Collapsed;// Hide the Frontal upload button
+                    break;
+                case "Left": 
+                    BtnUploadLeft.Visibility = Visibility.Collapsed; // Hide the Left upload button
+                    break;
+                case "Right":
+                    BtnUploadRight.Visibility = Visibility.Collapsed; // Hide the Right upload button
+                    break;
+                case "Back":
+                    BtnUploadBack.Visibility = Visibility.Collapsed; // Hide the Back upload button
+                    break;
+            }
+        }
+        // This method resets the UI for the current week by hiding all picture previews and enabling all upload buttons.
+        private void ResetCurrentWeekUI()
+        {
+            ImgFrontalPreview.Visibility = Visibility.Collapsed; // Hide the Frontal picture preview
+            ImgLeftPreview.Visibility = Visibility.Collapsed; // Hide the Left picture preview
+            ImgRightPreview.Visibility = Visibility.Collapsed; // Hide the Right picture preview
+            ImgBackPreview.Visibility = Visibility.Collapsed; // Hide the Back picture preview
+
+            BtnUploadFrontal.Visibility = Visibility.Visible; // Show the Frontal upload button
+            BtnUploadLeft.Visibility = Visibility.Visible; // Show the Left upload button
+            BtnUploadRight.Visibility = Visibility.Visible; // Show the Right upload button
+            BtnUploadBack.Visibility = Visibility.Visible; // Show the Back upload button
+
+            BtnUploadFrontal.IsEnabled = true; // Enable the Frontal upload button
+            BtnUploadLeft.IsEnabled = true; // Enable the Left upload button
+            BtnUploadRight.IsEnabled = true; // Enable the Right upload button
+            BtnUploadBack.IsEnabled = true; // Enable the Back upload button
+        }
+        // This method shows a picture preview based on the type of picture and its file path.
+        private void ShowPicturePreview(string type, string filePath)
+        {
+            var img = new BitmapImage(new Uri(filePath)); // Create a BitmapImage from the file path
+            switch (type)
+            {
+                case "Frontal":
+                    ImgFrontalPreview.Source = img; // Set the source of the Frontal picture preview to the BitmapImage
+                    ImgFrontalPreview.Visibility = Visibility.Visible; // Make the Frontal picture preview visible
+                    break;
+                case "Left":
+                    ImgLeftPreview.Source = img; // Set the source of the Left picture preview to the BitmapImage
+                    ImgLeftPreview.Visibility = Visibility.Visible; // Make the Left picture preview visible
+                    break;
+                case "Right":
+                    ImgRightPreview.Source = img; // Set the source of the Right picture preview to the BitmapImage
+                    ImgRightPreview.Visibility = Visibility.Visible; // Make the Right picture preview visible
+                    break;
+                case "Back":
+                    ImgBackPreview.Source = img; // Set the source of the Back picture preview to the BitmapImage
+                    ImgBackPreview.Visibility = Visibility.Visible; // Make the Back picture preview visible
+                    break;
+            }
+        }
+        // Event handlers for uploading pictures for different types (Frontal, Left, Right, Back)
+        private void BtnUploadFrontal_Click(object sender, RoutedEventArgs e)
+        {
+            UploadPicture("Frontal");
+        }
+        private void BtnUploadLeft_Click(object sender, RoutedEventArgs e)
+        {
+            UploadPicture("Left");
+        }
+        private void BtnUploadRight_Click(object sender, RoutedEventArgs e)
+        {
+            UploadPicture("Right");
+        }
+        private void BtnUploadBack_Click(object sender, RoutedEventArgs e)
+        {
+            UploadPicture("Back");
+        }
+        //Helper method for uploading a picture of a specific type (Frontal, Left, Right, Back).
+        private void UploadPicture(string type)
+        {
+            var currentWeek = FitLab.AppState.SessionState.CurrentWeek; // Get the current week from the session state
+
+            if (_currentPictureWeek != SessionState.CurrentWeek) // Check if the current picture week is not the current session week
+            {
+                MessageBox.Show("You can only upload pictures for the current week."); // Show an error message if the current picture week is not the current session week
+                return;
+            }
+            if (_currentWeekProgress != null && _currentWeekProgress.Pictures.Any(p => p.Type == type)) // Check if the current week progress already contains a picture of the specified type
+            {
+                MessageBox.Show($"{type} picture already uploaded."); // Show an error message if a picture of the specified type has already been uploaded for the current week
+                return;
+            }
+            if (_currentWeekProgress == null) // Check if the current week progress is null
+            {
+                _currentWeekProgress = new WeeklyProgress(); // Create a new WeeklyProgress object if it is null
+            }
+            var dlg = new Microsoft.Win32.OpenFileDialog // Create a new OpenFileDialog to select a picture file
+            {
+                Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp", // Set the filter to allow only image files
+                Title = $"Select {type} picture" // Set the title of the dialog to indicate which type of picture to select
+            };
+            if (dlg.ShowDialog() == true) // Show the dialog and check if the user selected a file
+            {
+                var destFileName = System.IO.Path.Combine(
+                    _uploadsFolder, 
+                    $"{Guid.NewGuid()}_{System.IO.Path.GetFileName(dlg.FileName)}"); // Generate a unique destination file name in the uploads folder
+
+                System.IO.File.Copy(dlg.FileName, destFileName, overwrite: true); // Copy the selected file to the destination file name, overwriting if it already exists
+
+                _currentWeekProgress.Pictures.Add(new ProgressPicture // Create a new ProgressPicture object and add it to the current week's progress pictures
+                {
+                    FilePath = destFileName, // Set the file path to the destination file name
+                    DateTaken = DateTime.UtcNow, // Set the date taken to the current UTC time
+                    Type = type // Set the type of the picture (Frontal, Left, Right, Back)
+                });
+                if (_user.WeeklyProgressPictures.Count <= _currentPictureWeek) // Check if the user's weekly progress pictures count is less than or equal to the current picture week
+                {
+                    while (_user.WeeklyProgressPictures.Count < _currentPictureWeek) //While the user's weekly progress pictures count is less than the current picture week
+                    {
+                        _user.WeeklyProgressPictures.Add(new WeeklyProgress()); // Add empty WeeklyProgress objects until the count matches the current picture week
+                    } 
+                    _user.WeeklyProgressPictures.Add(_currentWeekProgress); // Add the current week's progress pictures to the user's weekly progress pictures
+                }
+
+                _db.SaveUser(_user); // Save the updated user data to the database
+                LoadCurrentPictureWeek(); // Load the current picture week to update the UI with the newly uploaded picture
+            }
+        }
     }
 }
