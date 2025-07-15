@@ -20,6 +20,7 @@ namespace FitLab.Pages
         private readonly User _newUser = new(); // Represents the new user being created during intake
         private readonly List<Goal> _goals = new(); // List of goals added by the user during intake
         private readonly List<ProgressPicture> _intakePictures = new(); // List of progress pictures added by the user during intake
+        private Goal _editingGoal = null;
 
         //Initialize the intake page
         public UserIntake()
@@ -206,28 +207,98 @@ namespace FitLab.Pages
             StepWeight.Visibility = Visibility.Collapsed; // Hide the weight step
             StepGoals.Visibility = Visibility.Visible; // Show the next step for goals input
         }
-        // Event handler for the "Add Goal" button click
+        // Event handler for the "Add Goal" button click(Week 3 update: changed timeframe to use an int input and a combo box for the unit)
         private void AddGoal(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrWhiteSpace(TxtGoalDescription.Text) && !string.IsNullOrWhiteSpace(TxtGoalTimeframe.Text)) // Check if both goal description and timeframe are provided
+            if (!string.IsNullOrWhiteSpace(TxtGoalDescription.Text)
+                && int.TryParse(TxtGoalTimeframeAmount.Text.Trim(), out int amount)
+                && CmbGoalTimeframeUnit.SelectedItem is ComboBoxItem selectedUnit)
             {
-                var goal = new Goal // Create a new Goal object with the provided description and timeframe
+                if (_editingGoal == null)
                 {
-                    Description = TxtGoalDescription.Text.Trim(), // Trim whitespace from the description
-                    Timeframe = TxtGoalTimeframe.Text.Trim() // Trim whitespace from the timeframe
-                };
+                    // Adding new goal
+                    var goal = new Goal
+                    {
+                        Description = TxtGoalDescription.Text.Trim(),
+                        TimeframeAmount = amount,
+                        TimeframeUnit = selectedUnit.Content?.ToString() ?? "",
+                        Date = DateTime.UtcNow
+                    };
 
-                _goals.Add(goal); // Add the new goal to the list of goals
-                GoalsList.Items.Add($"{goal.Description} ({goal.Timeframe})"); // Add the goal to the ListBox for display
+                    _goals.Add(goal);
+                }
+                else
+                {
+                    // Updating existing goal
+                    _editingGoal.Description = TxtGoalDescription.Text.Trim();
+                    _editingGoal.TimeframeAmount = amount;
+                    _editingGoal.TimeframeUnit = selectedUnit.Content?.ToString() ?? "";
+                    // Optionally update Date to now if you prefer
+                    _editingGoal = null;
 
-                TxtGoalDescription.Text = ""; // Clear the goal description input field
-                TxtGoalTimeframe.Text = ""; // Clear the goal timeframe input field
+                    BtnAddGoal.Content = "Add Goal";
+                }
+
+                // Refresh list
+                RefreshGoalsList();
+
+                // Clear inputs
+                TxtGoalDescription.Text = "";
+                TxtGoalTimeframeAmount.Text = "";
+                CmbGoalTimeframeUnit.SelectedIndex = -1;
             }
-            else // If either the goal description or timeframe is empty
+            else
             {
-                MessageBox.Show("Enter both description and timeframe."); // Show a message prompting the user to enter both description and timeframe
+                MessageBox.Show("Please enter description, amount, and select a timeframe unit.");
             }
         }
+
+        private void EditGoal(object sender, RoutedEventArgs e)
+        {
+            if (GoalsList.SelectedIndex >= 0 && GoalsList.SelectedIndex < _goals.Count)
+            {
+                _editingGoal = _goals[GoalsList.SelectedIndex];
+
+                TxtGoalDescription.Text = _editingGoal.Description;
+                TxtGoalTimeframeAmount.Text = _editingGoal.TimeframeAmount.ToString();
+
+                // Pre-select the unit in combobox
+                foreach (ComboBoxItem item in CmbGoalTimeframeUnit.Items)
+                {
+                    if (item.Content?.ToString() == _editingGoal.TimeframeUnit)
+                    {
+                        CmbGoalTimeframeUnit.SelectedItem = item;
+                        break;
+                    }
+                }
+
+                // Change Add button text to "Update Goal"
+                BtnAddGoal.Content = "Update Goal";
+            }
+        }
+        private void RefreshGoalsList()
+        {
+            GoalsList.Items.Clear();
+            foreach (var goal in _goals)
+            {
+                GoalsList.Items.Add($"{goal.Description} ({goal.TimeframeAmount} {goal.TimeframeUnit})");
+            }
+        }
+        private void DeleteGoal(object sender, RoutedEventArgs e)
+        {
+            if (GoalsList.SelectedIndex >= 0 && GoalsList.SelectedIndex < _goals.Count)
+            {
+                if (_editingGoal == _goals[GoalsList.SelectedIndex])
+                {
+                    _editingGoal = null;
+                    BtnAddGoal.Content = "Add Goal";
+                }
+
+                _goals.RemoveAt(GoalsList.SelectedIndex);
+                RefreshGoalsList();
+            }
+        }
+
         // Event handler for the "Next" button on the Goals step
         private void NextGoals(object sender, RoutedEventArgs e)
         {
@@ -356,8 +427,7 @@ namespace FitLab.Pages
         private void FinishIntake(object sender, RoutedEventArgs e) // This method is called when the user clicks the "Finish Intake" button
         {
             _newUser.CompletedIntake = true; // Mark the user as having completed the intake process
-            // Spoof CreatedOn to 1 week ago
-            _newUser.CreatedOn = DateTime.UtcNow.AddDays(-7); // Set the CreatedOn date to 1 week ago purely for testing purposes
+            _newUser.CreatedOn = DateTime.UtcNow; // Set the CreatedOn date
 
             if (_newUser.WeightHistory.Count > 0) // Check if the user has entered any weight history
             {
@@ -372,9 +442,15 @@ namespace FitLab.Pages
 
                 _newUser.WeeklyProgressPictures.Add(new WeeklyProgress // Add a new WeeklyProgress entry to the user's weekly progress pictures
                 {
-                    WeekNumber = 0, // Set the week number to 0 for the initial intake pictures
                     Pictures = _intakePictures // Assign the list of intake pictures to the WeeklyProgress entry
                 });
+            }
+            if (_newUser.Goals.Count > 0) // If the user has entered any goals
+            {
+                foreach (var goal in _newUser.Goals) // Iterate through each goal
+                {
+                    goal.Date = _newUser.CreatedOn; // Set the date for each goal to the CreatedOn date
+                }
             }
             var db = new LocalDatabaseService(); // Create an instance of the LocalDatabaseService to interact with the local database
             db.SaveUser(_newUser); // Save the new user to the local database
