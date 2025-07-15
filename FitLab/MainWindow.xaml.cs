@@ -19,6 +19,10 @@ namespace FitLab
 
             if (user != null) // Check if a user was successfully loaded
             {
+                SessionState.CurrentWeek = CalculateCurrentWeek.GetWeekNumber( //Week 3 update: Calculate the current week number based on the user's creation date and local time zone
+                    user.CreatedOn,
+                    TimeZoneInfo.Local
+                );
                 Header.Visibility = Visibility.Visible; // Show the header if a user is loaded
                 MainFrame.Navigate(new Pages.HomePage()); // Navigate to the HomePage if a user is loaded
             }

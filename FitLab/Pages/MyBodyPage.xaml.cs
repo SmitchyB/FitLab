@@ -1,4 +1,5 @@
-﻿using FitLab.Data;
+﻿using FitLab.AppState;
+using FitLab.Data;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,8 +24,7 @@ namespace FitLab.Pages
 
             // Load user from DB
             _user = _db.LoadFirstUser() ?? new User(); // Load the first user from the database or create a new user if none exists
-            _currentWeightWeek = Components.CalculateCurrentWeek.GetWeekNumber(_user.CreatedOn, TimeZoneInfo.Utc); // Calculate current week based on user creation date and set current week
-
+            _currentWeightWeek = FitLab.AppState.SessionState.CurrentWeek; //Week 3 update: Set the current weight week based on the session state week # calculated on start of app
 
             // Populate fields
             TxtName.Text = _user.Name; // User's name
@@ -252,7 +252,8 @@ namespace FitLab.Pages
         // This method checks if the current week is editable based on the user's weight entry.
         private bool IsCurrentWeekEditable(FitLab.Data.WeightEntry? entry)
         {
-            var currentWeek = Components.CalculateCurrentWeek.GetWeekNumber(_user.CreatedOn, TimeZoneInfo.Utc); // Calculate the current week number based on the user's creation date and UTC timezone
+            var currentWeek = SessionState.CurrentWeek;//Week 3 update: Get the current week number from the session state
+
 
             if (_currentWeightWeek == 0) // If the current week is week 0
             {
