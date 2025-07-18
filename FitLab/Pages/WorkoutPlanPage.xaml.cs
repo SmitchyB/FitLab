@@ -1,4 +1,6 @@
-﻿using System;
+﻿using FitLab.Components;
+using FitLab.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +25,42 @@ namespace FitLab.Pages
         public WorkoutPlanPage()
         {
             InitializeComponent();
+            var allExercises = LocalDatabaseService.LoadExercises();
+        }
+
+        private void AddExercise_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button button) return;
+
+            var parent = VisualTreeHelper.GetParent(button) as Panel;
+            var selector = parent?.Children.OfType<ExerciseSelector>().FirstOrDefault();
+
+            if (selector != null)
+            {
+                selector.Visibility = Visibility.Visible;
+                button.Visibility = Visibility.Collapsed;
+
+                selector.ExerciseAdded += (exercise) =>
+                {
+                    selector.Visibility = Visibility.Collapsed;
+                    button.Visibility = Visibility.Visible;
+                };
+            }
+            if (selector != null)
+            {
+                selector.Visibility = Visibility.Visible;
+                button.Visibility = Visibility.Collapsed;
+
+                // Forcefully call Loaded logic
+                selector.RaiseEvent(new RoutedEventArgs(FrameworkElement.LoadedEvent));
+
+                selector.ExerciseAdded += (exercise) =>
+                {
+                    selector.Visibility = Visibility.Collapsed;
+                    button.Visibility = Visibility.Visible;
+                };
+            }
+
         }
     }
 }

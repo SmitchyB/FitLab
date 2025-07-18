@@ -2,6 +2,10 @@
 using System.Configuration;
 using System.Diagnostics;
 using FitLab.AppState;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
 
 /// <summary>
 /// This service handles local database operations using LiteDB.
@@ -53,6 +57,18 @@ namespace FitLab.Data
             var col = db.GetCollection<FitLab.AppState.AppState>("appstate"); // Get or create the "appstate" collection
             var state = col.FindById(1); // Find the AppState record with ID 1
             return state?.CurrentUserId; // Return the CurrentUserId if found, otherwise return null
+        }
+        public static List<Exercise> LoadExercises()
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "exercises.json");
+
+            if (!File.Exists(path))
+                return new List<Exercise>();
+
+            var json = File.ReadAllText(path);
+            return System.Text.Json.JsonSerializer.Deserialize<List<Exercise>>(json,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
+
         }
     }
 }

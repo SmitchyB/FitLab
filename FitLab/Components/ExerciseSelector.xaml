@@ -1,0 +1,131 @@
+﻿<UserControl x:Class="FitLab.Components.ExerciseSelector"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="400">
+
+    <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="5" Padding="10" Margin="0,10,0,0">
+        <StackPanel Orientation="Vertical" Background="Transparent">
+
+            <!-- Exercise Selection Dropdown -->
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,10">
+                <TextBlock Text="Select Exercise:" Width="120" Foreground="#9a42ff" VerticalAlignment="Center"/>
+                <ComboBox x:Name="CmbExerciseSelect" Width="180" Height="24">
+                    <ComboBox.ItemContainerStyle>
+                        <Style TargetType="ComboBoxItem">
+                            <Setter Property="Foreground" Value="Black"/>
+                        </Style>
+                    </ComboBox.ItemContainerStyle>
+                </ComboBox>
+            </StackPanel>
+
+            <!-- Filters -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <TextBlock Text="Muscle:" Width="60" Foreground="#9a42ff" VerticalAlignment="Center"/>
+                <ComboBox x:Name="CmbFilterMuscle" Width="80" Height="22" Margin="0,0,10,0">
+                    <ComboBox.ItemContainerStyle>
+                        <Style TargetType="ComboBoxItem">
+                            <Setter Property="Foreground" Value="Black"/>
+                        </Style>
+                    </ComboBox.ItemContainerStyle>
+                </ComboBox>
+
+                <TextBlock Text="Equip:" Width="50" Foreground="#9a42ff" VerticalAlignment="Center"/>
+                <ComboBox x:Name="CmbFilterEquip" Width="80" Height="22" Margin="0,0,10,0">
+                    <ComboBox.ItemContainerStyle>
+                        <Style TargetType="ComboBoxItem">
+                            <Setter Property="Foreground" Value="Black"/>
+                        </Style>
+                    </ComboBox.ItemContainerStyle>
+                </ComboBox>
+
+                <TextBlock Text="Diff:" Width="40" Foreground="#9a42ff" VerticalAlignment="Center"/>
+                <ComboBox x:Name="CmbFilterDifficulty" Width="80" Height="22" Margin="0,0,10,0">
+                    <ComboBox.ItemContainerStyle>
+                        <Style TargetType="ComboBoxItem">
+                            <Setter Property="Foreground" Value="Black"/>
+                        </Style>
+                    </ComboBox.ItemContainerStyle>
+                </ComboBox>
+
+                <TextBlock Text="Type:" Width="40" Foreground="#9a42ff" VerticalAlignment="Center"/>
+                <ComboBox x:Name="CmbFilterType" Width="80" Height="22">
+                    <ComboBox.ItemContainerStyle>
+                        <Style TargetType="ComboBoxItem">
+                            <Setter Property="Foreground" Value="Black"/>
+                        </Style>
+                    </ComboBox.ItemContainerStyle>
+                </ComboBox>
+            </StackPanel>
+
+            <!-- Separator -->
+            <TextBlock Text="-------- Or Create Your Own Exercise --------"
+                       Margin="0,10,0,10"
+                       Foreground="#9a42ff"
+                       HorizontalAlignment="Center"
+                       TextWrapping="Wrap"/>
+
+            <!-- Custom Inputs Grid -->
+            <UniformGrid Rows="3" Columns="4" Margin="0,0,0,10" HorizontalAlignment="Left">
+                <TextBlock Text="Name:" Foreground="#9a42ff" VerticalAlignment="Center"/>
+                <TextBox x:Name="TxtCustomName" Width="100" Height="22" Margin="2" VerticalAlignment="Center"/>
+
+                <TextBlock Text="Muscle Group:" Foreground="#9a42ff" VerticalAlignment="Center"/>
+                <ComboBox x:Name="CmbCustomMuscle" Width="100" Height="22" Margin="2" VerticalAlignment="Center">
+                    <ComboBox.ItemContainerStyle>
+                        <Style TargetType="ComboBoxItem">
+                            <Setter Property="Foreground" Value="Black"/>
+                        </Style>
+                    </ComboBox.ItemContainerStyle>
+                </ComboBox>
+
+                <TextBlock Text="Equipment:" Foreground="#9a42ff" VerticalAlignment="Center"/>
+                <TextBox x:Name="TxtCustomEquip" Width="100" Height="22" Margin="2" VerticalAlignment="Center"/>
+
+                <TextBlock Text="Difficulty:" Foreground="#9a42ff" VerticalAlignment="Center"/>
+                <ComboBox x:Name="CmbCustomDifficulty" Width="100" Height="22" Margin="2" VerticalAlignment="Center">
+                    <ComboBoxItem Content="Beginner"/>
+                    <ComboBoxItem Content="Intermediate"/>
+                    <ComboBoxItem Content="Advanced"/>
+                    <ComboBox.ItemContainerStyle>
+                        <Style TargetType="ComboBoxItem">
+                            <Setter Property="Foreground" Value="Black"/>
+                        </Style>
+                    </ComboBox.ItemContainerStyle>
+                </ComboBox>
+
+                <TextBlock Text="Type:" Foreground="#9a42ff" VerticalAlignment="Center"/>
+                <ComboBox x:Name="CmbCustomType" Width="100" Height="22" Margin="2" VerticalAlignment="Center">
+                    <ComboBoxItem Content="Strength"/>
+                    <ComboBoxItem Content="Cardio"/>
+                    <ComboBoxItem Content="Flexibility"/>
+                    <ComboBox.ItemContainerStyle>
+                        <Style TargetType="ComboBoxItem">
+                            <Setter Property="Foreground" Value="Black"/>
+                        </Style>
+                    </ComboBox.ItemContainerStyle>
+                </ComboBox>
+
+                <TextBlock Text="Description:" Foreground="#9a42ff" VerticalAlignment="Center"/>
+                <TextBox x:Name="TxtCustomDesc"
+                         Width="100"
+                         Height="40"
+                         Margin="2"
+                         TextWrapping="Wrap"
+                         AcceptsReturn="True"
+                         VerticalAlignment="Center"/>
+            </UniformGrid>
+
+            <!-- Add to Workout Button -->
+            <Button Content="Add to Workout"
+                    Click="BtnAddToWorkout_Click"
+                    Width="120"
+                    Height="30"
+                    HorizontalAlignment="Left"
+                    Background="#9a42ff"
+                    Foreground="White"/>
+        </StackPanel>
+    </Border>
+</UserControl>
+

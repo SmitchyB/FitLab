@@ -38,5 +38,11 @@
   <ItemGroup>
     <Folder Include="Uploads\" />
   </ItemGroup>
+	
+  <ItemGroup>
+    <Content Include="Data\exercises.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
 </Project>
