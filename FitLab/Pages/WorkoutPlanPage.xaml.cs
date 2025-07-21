@@ -118,17 +118,76 @@ namespace FitLab.Pages
                     _ => null
                 };
 
-                if (exercises != null && exercises.Count > 0)
-                {
-                    Debug.WriteLine($"[WorkoutPlanPage] {day} - {section} has {exercises.Count} exercises.");
-                    itemsControl.ItemsSource = exercises.Select(e => e.Name).ToList();
-                }
-                else
+                itemsControl.Items.Clear();
+
+                if (exercises == null || exercises.Count == 0)
                 {
                     Debug.WriteLine($"[WorkoutPlanPage] {day} - {section} is empty.");
-                    itemsControl.ItemsSource = null;
+                    continue;
+                }
+
+                Debug.WriteLine($"[WorkoutPlanPage] {day} - {section} has {exercises.Count} exercises.");
+
+                foreach (var exercise in exercises)
+                {
+                    var container = new Border
+                    {
+                        Margin = new Thickness(5),
+                        BorderBrush = Brushes.MediumPurple,
+                        BorderThickness = new Thickness(1),
+                        CornerRadius = new CornerRadius(6),
+                        Padding = new Thickness(8)
+                    };
+
+                    var stack = new StackPanel();
+
+                    var deleteBtn = new Button
+                    {
+                        Content = "❌",
+                        HorizontalAlignment = HorizontalAlignment.Right,
+                        Width = 25,
+                        Height = 25,
+                        Tag = exercise.Guid
+                    };
+                    deleteBtn.Click += (s, e) => DeleteExercise(day, section, (Guid)((Button)s).Tag);
+                    stack.Children.Add(deleteBtn);
+
+                    stack.Children.Add(new TextBlock { Text = $"Name: {exercise.Name}", FontWeight = FontWeights.Bold });
+                    stack.Children.Add(new TextBlock { Text = $"Muscle Group: {exercise.MuscleGroup}" });
+                    stack.Children.Add(new TextBlock { Text = $"Difficulty: {exercise.Difficulty}" });
+                    stack.Children.Add(new TextBlock { Text = $"Type: {string.Join(", ", exercise.Type)}" });
+                    stack.Children.Add(new TextBlock { Text = $"Equipment: {string.Join(", ", exercise.Equipment)}" });
+                    stack.Children.Add(new TextBlock { Text = $"Description: {exercise.Description}", TextWrapping = TextWrapping.Wrap });
+
+                    container.Child = stack;
+                    itemsControl.Items.Add(container);
                 }
             }
         }
+
+        private void DeleteExercise(string day, string section, Guid guid)
+        {
+            var daily = _currentUser.WorkoutPlan.Days.FirstOrDefault(d => d.DayOfWeek == day);
+            if (daily == null) return;
+
+            var list = section switch
+            {
+                "Warmup" => daily.Warmup,
+                "Main" => daily.Main,
+                "Cooldown" => daily.Cooldown,
+                _ => null
+            };
+
+            if (list == null) return;
+
+            var target = list.FirstOrDefault(e => e.Guid == guid);
+            if (target != null)
+            {
+                list.Remove(target);
+                new LocalDatabaseService().SaveUser(_currentUser);
+                RefreshUIForDay(day);
+            }
+        }
+
     }
 }
