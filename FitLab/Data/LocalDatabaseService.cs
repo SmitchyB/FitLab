@@ -73,5 +73,29 @@ namespace FitLab.Data
             return System.Text.Json.JsonSerializer.Deserialize<List<Exercise>>(json, _jsonOptions) ?? new();
 
         }
+        public void SaveExercise(Exercise exercise)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "exercises.json");
+
+            List<Exercise> allExercises = File.Exists(path)
+                ? System.Text.Json.JsonSerializer.Deserialize<List<Exercise>>(File.ReadAllText(path), _jsonOptions) ?? new()
+                : new();
+
+            if (string.IsNullOrWhiteSpace(exercise.Name) || allExercises.Any(e => e.Name.Equals(exercise.Name, StringComparison.OrdinalIgnoreCase)))
+            {
+                Debug.WriteLine("[SaveExercise] Invalid or duplicate name.");
+                return;
+            }
+
+            if (exercise.Guid == Guid.Empty)
+                exercise.Guid = Guid.NewGuid();
+
+            allExercises.Add(exercise);
+
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            File.WriteAllText(path, System.Text.Json.JsonSerializer.Serialize(allExercises, _jsonOptions));
+
+            Debug.WriteLine($"[SaveExercise] Saved exercise: {exercise.Name} ({exercise.Guid})");
+        }
     }
 }

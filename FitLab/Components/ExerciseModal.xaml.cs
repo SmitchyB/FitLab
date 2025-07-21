@@ -17,7 +17,7 @@ namespace FitLab.Components
         private readonly string _day;
         private readonly string _section;
 
-        private List<Exercise> _allExercises = new();
+        private readonly List<Exercise> _allExercises = new();
         private List<Exercise> _filteredExercises = new();
         private readonly HashSet<string> selectedMuscles = new();
         private readonly HashSet<string> selectedEquipments = new();
@@ -38,6 +38,7 @@ namespace FitLab.Components
             SearchBox.TextChanged += (s, e) => ApplyFilters();
             PopulateFilters();
             RefreshExerciseList();
+            PopulateCreateTabDropdowns();
         }
 
         private void PopulateFilters()
@@ -96,7 +97,9 @@ namespace FitLab.Components
 
         private void AddSelected_Click(object sender, RoutedEventArgs e)
         {
-            if (ExerciseList.SelectedItem is not Exercise selected)
+            Exercise? selected = SelectedExercise ?? ExerciseList.SelectedItem as Exercise;
+
+            if (selected == null)
             {
                 MessageBox.Show("Please select an exercise to add.");
                 return;
@@ -140,6 +143,7 @@ namespace FitLab.Components
                 MessageBox.Show($"Unknown section: {_section}");
                 return;
             }
+
             Debug.WriteLine($"[ExerciseModal] Before add: {targetList.Count} exercises");
             targetList.Add(selected);
             Debug.WriteLine($"[ExerciseModal] After add: {targetList.Count} exercises");
@@ -151,9 +155,74 @@ namespace FitLab.Components
             Close();
         }
 
+
+        private void PopulateCreateTabDropdowns()
+        {
+            MuscleInput.ItemsSource = _allExercises
+                .Select(e => e.MuscleGroup)
+                .Where(e => !string.IsNullOrWhiteSpace(e))
+                .Distinct()
+                .OrderBy(e => e)
+                .ToList();
+
+            TypeInput.ItemsSource = _allExercises
+                .SelectMany(e => e.Type)
+                .Where(e => !string.IsNullOrWhiteSpace(e))
+                .Distinct()
+                .OrderBy(e => e)
+                .ToList();
+
+            DifficultyInput.ItemsSource = _allExercises
+                .Select(e => e.Difficulty)
+                .Where(e => !string.IsNullOrWhiteSpace(e))
+                .Distinct()
+                .OrderBy(e => e)
+                .ToList();
+
+            EquipmentInput.ItemsSource = _allExercises
+                .SelectMany(e => e.Equipment)
+                .Where(e => !string.IsNullOrWhiteSpace(e))
+                .Distinct()
+                .OrderBy(e => e)
+                .ToList();
+        }
+
+
         private void CreateExercise_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Creation logic not implemented yet.");
+            var name = ExerciseNameInput.Text.Trim();
+            var muscle = MuscleInput.SelectedItem as string;
+            var type = TypeInput.SelectedItem as string;
+            var difficulty = DifficultyInput.SelectedItem as string;
+            var description = DescriptionInput.Text.Trim();
+            var equipmentText = EquipmentInput.Text.Trim();
+
+            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(muscle) || string.IsNullOrEmpty(type))
+            {
+                MessageBox.Show("Name, muscle group, and type are required.");
+                return;
+            }
+
+            var newExercise = new Exercise
+            {
+                Name = name,
+                MuscleGroup = muscle,
+                Type = new List<string> { type },
+                Difficulty = difficulty ?? "",
+                Description = description,
+                Equipment = string.IsNullOrWhiteSpace(equipmentText)
+                    ? new List<string>()
+                    : equipmentText.Split(',').Select(e => e.Trim()).ToList()
+            };
+
+            GlobalCache.AllExercises.Add(newExercise);
+            new LocalDatabaseService().SaveExercise(newExercise);
+
+            SelectedExercise = newExercise;
+
+            // Reuse add logic
+            AddSelected_Click(sender, e);
         }
+
     }
 }
