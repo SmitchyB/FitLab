@@ -24,14 +24,13 @@
                                Foreground="#9a42ff"
                                Margin="0,0,0,20"/>
                     <!-- Sunday -->
-                    <Expander Header="Sunday" IsExpanded="True" Margin="0,0,0,10" Foreground="#9a42ff">
+                    <Expander Header="Sunday" x:Name="SundayExpander" IsExpanded="True" Margin="0,0,0,10" Foreground="#9a42ff">
                         <StackPanel>
                             <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,0,0,10">
                                 <StackPanel>
                                     <TextBlock Text="Warmup" FontWeight="Bold" FontSize="16" Foreground="#9a42ff" Margin="0,0,0,5"/>
                                     <ItemsControl Name="SundayWarmupExercises"/>
                                     <Button Content="+ Add Exercise" Margin="0,5,0,0" HorizontalAlignment="Left" Click="AddExercise_Click" />
-                                    <components:ExerciseSelector Visibility="Collapsed" />
                                 </StackPanel>
                             </Border>
                             <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,0,0,10">
@@ -39,7 +38,6 @@
                                     <TextBlock Text="Main Workout" FontWeight="Bold" FontSize="16" Foreground="#9a42ff" Margin="0,0,0,5"/>
                                     <ItemsControl Name="SundayMainExercises"/>
                                     <Button Content="+ Add Exercise" Margin="0,5,0,0" HorizontalAlignment="Left" Click="AddExercise_Click" />
-                                    <components:ExerciseSelector Visibility="Collapsed" />
                                 </StackPanel>
                             </Border>
                             <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,0,0,10">
@@ -47,22 +45,18 @@
                                     <TextBlock Text="Cooldown" FontWeight="Bold" FontSize="16" Foreground="#9a42ff" Margin="0,0,0,5"/>
                                     <ItemsControl Name="SundayCooldownExercises"/>
                                     <Button Content="+ Add Exercise" Margin="0,5,0,0" HorizontalAlignment="Left" Click="AddExercise_Click" />
-                                    <components:ExerciseSelector Visibility="Collapsed" />
                                 </StackPanel>
                             </Border>
                         </StackPanel>
                     </Expander>
-
                     <!-- Monday -->
-                    <Expander Header="Monday" IsExpanded="True" Margin="0,0,0,10" Foreground="#9a42ff">
+                    <Expander Header="Monday" x:Name="MondayExpander" IsExpanded="True" Margin="0,0,0,10" Foreground="#9a42ff">
                         <StackPanel>
                             <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,0,0,10">
                                 <StackPanel>
                                     <TextBlock Text="Warmup" FontWeight="Bold" FontSize="16" Foreground="#9a42ff" Margin="0,0,0,5"/>
                                     <ItemsControl Name="MondayWarmupExercises"/>
                                     <Button Content="+ Add Exercise" Margin="0,5,0,0" HorizontalAlignment="Left" Click="AddExercise_Click" />
-                                    <components:ExerciseSelector Visibility="Collapsed" />
-
                                 </StackPanel>
                             </Border>
                             <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,0,0,10">
@@ -70,8 +64,6 @@
                                     <TextBlock Text="Main Workout" FontWeight="Bold" FontSize="16" Foreground="#9a42ff" Margin="0,0,0,5"/>
                                     <ItemsControl Name="MondayMainExercises"/>
                                     <Button Content="+ Add Exercise" Margin="0,5,0,0" HorizontalAlignment="Left" Click="AddExercise_Click" />
-                                    <components:ExerciseSelector Visibility="Collapsed" />
-
                                 </StackPanel>
                             </Border>
                             <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,0,0,10">
@@ -79,21 +71,18 @@
                                     <TextBlock Text="Cooldown" FontWeight="Bold" FontSize="16" Foreground="#9a42ff" Margin="0,0,0,5"/>
                                     <ItemsControl Name="MondayCooldownExercises"/>
                                     <Button Content="+ Add Exercise" Margin="0,5,0,0" HorizontalAlignment="Left" Click="AddExercise_Click" />
-                                    <components:ExerciseSelector Visibility="Collapsed" />
                                 </StackPanel>
                             </Border>
                         </StackPanel>
                     </Expander>
-
                     <!-- Tuesday -->
-                    <Expander Header="Tuesday" IsExpanded="True" Margin="0,0,0,10" Foreground="#9a42ff">
+                    <Expander Header="Tuesday" x:Name="TuesdayExpander" IsExpanded="True" Margin="0,0,0,10" Foreground="#9a42ff">
                         <StackPanel>
                             <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,0,0,10">
                                 <StackPanel>
                                     <TextBlock Text="Warmup" FontWeight="Bold" FontSize="16" Foreground="#9a42ff" Margin="0,0,0,5"/>
                                     <ItemsControl Name="TuesdayWarmupExercises"/>
                                     <Button Content="+ Add Exercise" Margin="0,5,0,0" HorizontalAlignment="Left" Click="AddExercise_Click" />
-                                    <components:ExerciseSelector Visibility="Collapsed" />
                                 </StackPanel>
                             </Border>
                             <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,0,0,10">
@@ -101,7 +90,6 @@
                                     <TextBlock Text="Main Workout" FontWeight="Bold" FontSize="16" Foreground="#9a42ff" Margin="0,0,0,5"/>
                                     <ItemsControl Name="TuesdayMainExercises"/>
                                     <Button Content="+ Add Exercise" Margin="0,5,0,0" HorizontalAlignment="Left" Click="AddExercise_Click" />
-                                    <components:ExerciseSelector Visibility="Collapsed" />
                                 </StackPanel>
                             </Border>
                             <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,0,0,10">
@@ -109,21 +97,18 @@
                                     <TextBlock Text="Cooldown" FontWeight="Bold" FontSize="16" Foreground="#9a42ff" Margin="0,0,0,5"/>
                                     <ItemsControl Name="TuesdayCooldownExercises"/>
                                     <Button Content="+ Add Exercise" Margin="0,5,0,0" HorizontalAlignment="Left" Click="AddExercise_Click" />
-                                    <components:ExerciseSelector Visibility="Collapsed" />
                                 </StackPanel>
                             </Border>
                         </StackPanel>
                     </Expander>
-
                     <!-- Wednesday -->
-                    <Expander Header="Wednesday" IsExpanded="True" Margin="0,0,0,10" Foreground="#9a42ff">
+                    <Expander Header="Wednesday" x:Name="WednesdayExpander" IsExpanded="True" Margin="0,0,0,10" Foreground="#9a42ff">
                         <StackPanel>
                             <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,0,0,10">
                                 <StackPanel>
                                     <TextBlock Text="Warmup" FontWeight="Bold" FontSize="16" Foreground="#9a42ff" Margin="0,0,0,5"/>
                                     <ItemsControl Name="WednesdayWarmupExercises"/>
                                     <Button Content="+ Add Exercise" Margin="0,5,0,0" HorizontalAlignment="Left" Click="AddExercise_Click" />
-                                    <components:ExerciseSelector Visibility="Collapsed" />
                                 </StackPanel>
                             </Border>
                             <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,0,0,10">
@@ -131,7 +116,6 @@
                                     <TextBlock Text="Main Workout" FontWeight="Bold" FontSize="16" Foreground="#9a42ff" Margin="0,0,0,5"/>
                                     <ItemsControl Name="WednesdayMainExercises"/>
                                     <Button Content="+ Add Exercise" Margin="0,5,0,0" HorizontalAlignment="Left" Click="AddExercise_Click" />
-                                    <components:ExerciseSelector Visibility="Collapsed" />
                                 </StackPanel>
                             </Border>
                             <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,0,0,10">
@@ -139,21 +123,18 @@
                                     <TextBlock Text="Cooldown" FontWeight="Bold" FontSize="16" Foreground="#9a42ff" Margin="0,0,0,5"/>
                                     <ItemsControl Name="WednesdayCooldownExercises"/>
                                     <Button Content="+ Add Exercise" Margin="0,5,0,0" HorizontalAlignment="Left" Click="AddExercise_Click" />
-                                    <components:ExerciseSelector Visibility="Collapsed" />
                                 </StackPanel>
                             </Border>
                         </StackPanel>
                     </Expander>
-
                     <!-- Thursday -->
-                    <Expander Header="Thursday" IsExpanded="True" Margin="0,0,0,10" Foreground="#9a42ff">
+                    <Expander Header="Thursday" x:Name="ThursdayExpander" IsExpanded="True" Margin="0,0,0,10" Foreground="#9a42ff">
                         <StackPanel>
                             <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,0,0,10">
                                 <StackPanel>
                                     <TextBlock Text="Warmup" FontWeight="Bold" FontSize="16" Foreground="#9a42ff" Margin="0,0,0,5"/>
                                     <ItemsControl Name="ThursdayWarmupExercises"/>
                                     <Button Content="+ Add Exercise" Margin="0,5,0,0" HorizontalAlignment="Left" Click="AddExercise_Click" />
-                                    <components:ExerciseSelector Visibility="Collapsed" />
                                 </StackPanel>
                             </Border>
                             <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,0,0,10">
@@ -161,7 +142,7 @@
                                     <TextBlock Text="Main Workout" FontWeight="Bold" FontSize="16" Foreground="#9a42ff" Margin="0,0,0,5"/>
                                     <ItemsControl Name="ThursdayMainExercises"/>
                                     <Button Content="+ Add Exercise" Margin="0,5,0,0" HorizontalAlignment="Left" Click="AddExercise_Click" />
-                                    <components:ExerciseSelector Visibility="Collapsed" />
+
                                 </StackPanel>
                             </Border>
                             <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,0,0,10">
@@ -169,21 +150,18 @@
                                     <TextBlock Text="Cooldown" FontWeight="Bold" FontSize="16" Foreground="#9a42ff" Margin="0,0,0,5"/>
                                     <ItemsControl Name="ThursdayCooldownExercises"/>
                                     <Button Content="+ Add Exercise" Margin="0,5,0,0" HorizontalAlignment="Left" Click="AddExercise_Click" />
-                                    <components:ExerciseSelector Visibility="Collapsed" />
                                 </StackPanel>
                             </Border>
                         </StackPanel>
                     </Expander>
-
                     <!-- Friday -->
-                    <Expander Header="Friday" IsExpanded="True" Margin="0,0,0,10" Foreground="#9a42ff">
+                    <Expander Header="Friday" x:Name="FridayExpander" IsExpanded="True" Margin="0,0,0,10" Foreground="#9a42ff">
                         <StackPanel>
                             <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,0,0,10">
                                 <StackPanel>
                                     <TextBlock Text="Warmup" FontWeight="Bold" FontSize="16" Foreground="#9a42ff" Margin="0,0,0,5"/>
                                     <ItemsControl Name="FridayWarmupExercises"/>
                                     <Button Content="+ Add Exercise" Margin="0,5,0,0" HorizontalAlignment="Left" Click="AddExercise_Click" />
-                                    <components:ExerciseSelector Visibility="Collapsed" />
                                 </StackPanel>
                             </Border>
                             <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,0,0,10">
@@ -191,7 +169,6 @@
                                     <TextBlock Text="Main Workout" FontWeight="Bold" FontSize="16" Foreground="#9a42ff" Margin="0,0,0,5"/>
                                     <ItemsControl Name="FridayMainExercises"/>
                                     <Button Content="+ Add Exercise" Margin="0,5,0,0" HorizontalAlignment="Left" Click="AddExercise_Click" />
-                                    <components:ExerciseSelector Visibility="Collapsed" />
                                 </StackPanel>
                             </Border>
                             <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,0,0,10">
@@ -199,21 +176,18 @@
                                     <TextBlock Text="Cooldown" FontWeight="Bold" FontSize="16" Foreground="#9a42ff" Margin="0,0,0,5"/>
                                     <ItemsControl Name="FridayCooldownExercises"/>
                                     <Button Content="+ Add Exercise" Margin="0,5,0,0" HorizontalAlignment="Left" Click="AddExercise_Click" />
-                                    <components:ExerciseSelector Visibility="Collapsed" />
                                 </StackPanel>
                             </Border>
                         </StackPanel>
                     </Expander>
-
                     <!-- Saturday -->
-                    <Expander Header="Saturday" IsExpanded="True" Margin="0,0,0,10" Foreground="#9a42ff">
+                    <Expander Header="Saturday" x:Name="SaturdayExpander" IsExpanded="True" Margin="0,0,0,10" Foreground="#9a42ff">
                         <StackPanel>
                             <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,0,0,10">
                                 <StackPanel>
                                     <TextBlock Text="Warmup" FontWeight="Bold" FontSize="16" Foreground="#9a42ff" Margin="0,0,0,5"/>
                                     <ItemsControl Name="SaturdayWarmupExercises"/>
                                     <Button Content="+ Add Exercise" Margin="0,5,0,0" HorizontalAlignment="Left" Click="AddExercise_Click" />
-                                    <components:ExerciseSelector Visibility="Collapsed" />
                                 </StackPanel>
                             </Border>
                             <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,0,0,10">
@@ -221,7 +195,6 @@
                                     <TextBlock Text="Main Workout" FontWeight="Bold" FontSize="16" Foreground="#9a42ff" Margin="0,0,0,5"/>
                                     <ItemsControl Name="SaturdayMainExercises"/>
                                     <Button Content="+ Add Exercise" Margin="0,5,0,0" HorizontalAlignment="Left" Click="AddExercise_Click" />
-                                    <components:ExerciseSelector Visibility="Collapsed" />
                                 </StackPanel>
                             </Border>
                             <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,0,0,10">
@@ -229,7 +202,6 @@
                                     <TextBlock Text="Cooldown" FontWeight="Bold" FontSize="16" Foreground="#9a42ff" Margin="0,0,0,5"/>
                                     <ItemsControl Name="SaturdayCooldownExercises"/>
                                     <Button Content="+ Add Exercise" Margin="0,5,0,0" HorizontalAlignment="Left" Click="AddExercise_Click" />
-                                    <components:ExerciseSelector Visibility="Collapsed" />
                                 </StackPanel>
                             </Border>
                         </StackPanel>

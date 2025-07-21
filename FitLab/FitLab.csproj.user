@@ -2,7 +2,7 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup />
   <ItemGroup>
-    <Compile Update="Components\ExerciseSelector.xaml.cs">
+    <Compile Update="Components\ExerciseModal.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Components\HeaderControl.xaml.cs">

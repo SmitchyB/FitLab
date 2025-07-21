@@ -15,6 +15,10 @@ namespace FitLab.Data
     public class LocalDatabaseService
     {
         private readonly string _dbPath = "FitLabData.db"; // Default database path
+        private static readonly JsonSerializerOptions _jsonOptions = new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
 
         // This constructor initializes the database service and ensures the database file exists.
         public void SaveUser(User user)
@@ -66,8 +70,7 @@ namespace FitLab.Data
                 return new List<Exercise>();
 
             var json = File.ReadAllText(path);
-            return System.Text.Json.JsonSerializer.Deserialize<List<Exercise>>(json,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
+            return System.Text.Json.JsonSerializer.Deserialize<List<Exercise>>(json, _jsonOptions) ?? new();
 
         }
     }

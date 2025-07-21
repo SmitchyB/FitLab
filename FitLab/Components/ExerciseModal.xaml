@@ -1,0 +1,170 @@
+﻿<Window x:Class="FitLab.Components.ExerciseModal"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Select or Create Exercise"
+        Height="700" Width="1000"
+        WindowStartupLocation="CenterOwner"
+        Background="#1e1e1e"
+        Foreground="#9a42ff">
+
+    <Grid Margin="20">
+        <TabControl Background="#2e2e2e"
+                BorderBrush="#9a42ff"
+                BorderThickness="1"
+                Foreground="#9a42ff">
+
+            <!-- FIND TAB -->
+            <TabItem Header="Find">
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="250"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Filters Panel -->
+                    <ScrollViewer Grid.Column="0" Margin="0,0,10,0" VerticalScrollBarVisibility="Auto" Height="550">
+                        <StackPanel>
+                            <TextBlock Text="Filters"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Margin="0,0,0,10"
+                               Foreground="#9a42ff"/>
+                            <Expander Header="Muscle Groups" IsExpanded="True" Foreground="#9a42ff">
+                                <ItemsControl x:Name="MuscleFilters" Margin="0,2,0,10"/>
+                            </Expander>
+                            <Expander Header="Equipment" IsExpanded="True" Foreground="#9a42ff">
+                                <ItemsControl x:Name="EquipmentFilters" Margin="0,2,0,10"/>
+                            </Expander>
+                            <Expander Header="Difficulty" IsExpanded="True" Foreground="#9a42ff">
+                                <ItemsControl x:Name="DifficultyFilters" Margin="0,2,0,10"/>
+                            </Expander>
+                            <Expander Header="Type" IsExpanded="True" Foreground="#9a42ff">
+                                <ItemsControl x:Name="TypeFilters" Margin="0,2,0,10"/>
+                            </Expander>
+                        </StackPanel>
+                    </ScrollViewer>
+                    <!-- Search + Results -->
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Search" Margin="0,0,0,4" Foreground="#9a42ff"/>
+                        <TextBox   x:Name="SearchBox"
+                       BorderBrush="#9a42ff"
+                       BorderThickness="1"
+                       Margin="0,0,0,10"/>
+
+                        <ListBox   x:Name="ExerciseList"
+                       BorderBrush="#9a42ff"
+                       BorderThickness="1"
+                       Height="500"
+                       VirtualizingStackPanel.IsVirtualizing="True"
+                       VirtualizingStackPanel.VirtualizationMode="Recycling"
+                       ScrollViewer.IsDeferredScrollingEnabled="True"/>
+
+                        <Button    Content="Add Selected"
+                       BorderBrush="#9a42ff"
+                       BorderThickness="1"
+                       Foreground="#9a42ff"
+                       Background="Transparent"
+                       Margin="0,10,0,0"
+                       Height="40"
+                       HorizontalAlignment="Right"
+                       Click="AddSelected_Click"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+
+            <!-- CREATE TAB -->
+            <TabItem Header="Create" Height="22" Margin="-2,-2,-2,0" VerticalAlignment="Top">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <!-- Name -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Muscle & Type -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Equipment & Difficulty -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Description -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Button -->
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Exercise Name (full width) -->
+                    <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,10">
+                        <TextBlock Text="Exercise Name" Margin="0,0,0,4" Foreground="#9a42ff"/>
+                        <TextBox x:Name="ExerciseNameInput"
+                     BorderBrush="#9a42ff"
+                     BorderThickness="1"/>
+                    </StackPanel>
+
+                    <!-- Muscle Group & Type -->
+                    <Grid Grid.Row="1" Grid.ColumnSpan="2" Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                            <TextBlock Text="Muscle Group" Margin="0,0,0,4" Foreground="#9a42ff"/>
+                            <ComboBox x:Name="MuscleInput"
+                        BorderBrush="#9a42ff"
+                        BorderThickness="1"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Type" Margin="0,0,0,4" Foreground="#9a42ff"/>
+                            <ComboBox x:Name="TypeInput"
+                        BorderBrush="#9a42ff"
+                        BorderThickness="1"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Equipment & Difficulty -->
+                    <Grid Grid.Row="2" Grid.ColumnSpan="2" Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                            <TextBlock Text="Equipment" Margin="0,0,0,4" Foreground="#9a42ff"/>
+                            <ComboBox x:Name="EquipmentInput"
+                        IsEditable="True"
+                        BorderBrush="#9a42ff"
+                        BorderThickness="1"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Difficulty" Margin="0,0,0,4" Foreground="#9a42ff"/>
+                            <ComboBox x:Name="DifficultyInput"
+                        BorderBrush="#9a42ff"
+                        BorderThickness="1"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Description (full width) -->
+                    <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Margin="0,0,0,10">
+                        <TextBlock Text="Description" Margin="0,0,0,4" Foreground="#9a42ff"/>
+                        <TextBox   x:Name="DescriptionInput"
+                       Height="80"
+                       TextWrapping="Wrap"
+                       AcceptsReturn="True"
+                       BorderBrush="#9a42ff"
+                       BorderThickness="1"/>
+                    </StackPanel>
+
+                    <!-- Create Button -->
+                    <Button Grid.Row="4" Grid.Column="1"
+                  Content="Create Exercise"
+                  BorderBrush="#9a42ff"
+                  BorderThickness="1"
+                  Foreground="#9a42ff"
+                  Background="Transparent"
+                  Height="40"
+                  HorizontalAlignment="Right"
+                  Click="CreateExercise_Click"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

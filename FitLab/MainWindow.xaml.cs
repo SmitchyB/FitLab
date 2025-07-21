@@ -1,9 +1,10 @@
-﻿using FitLab.Data;
+﻿using FitLab.appstate;
+using FitLab.AppState;
+using FitLab.Components;
+using FitLab.Data;
+using System.Diagnostics;
 using System.Reflection.PortableExecutable;
 using System.Windows;
-using FitLab.Components;
-using System.Diagnostics;
-using FitLab.AppState;
 
 namespace FitLab
 {
@@ -16,6 +17,8 @@ namespace FitLab
 
             var db = new LocalDatabaseService(); // Create an instance of the LocalDatabaseService to interact with the database
             var user = db.LoadFirstUser(); // Load the first user from the database
+            GlobalCache.AllExercises = LocalDatabaseService.LoadExercises();
+            Debug.WriteLine($"[INIT] Preloaded {GlobalCache.AllExercises.Count} exercises.");
 
             if (user != null) // Check if a user was successfully loaded
             {

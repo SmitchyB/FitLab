@@ -15,6 +15,8 @@
         public List<DailyWaterIntake> WaterIntake { get; set; } = new(); // User's daily water intake records
         public List<DailyFoodIntake> FoodIntake { get; set; } = new(); // User's daily food intake records
         public List<WeeklyProgress> WeeklyProgressPictures { get; set; } = new(); // User's weekly progress pictures
+        public WorkoutPlan WorkoutPlan { get; set; } = new();
+
     }
     // Weight Entry model for the Weight History
     public class WeightEntry
@@ -69,5 +71,17 @@
     public class WeeklyProgress
     {
         public List<ProgressPicture> Pictures { get; set; } = new(); // List of pictures taken for that week
+    }
+    public class WorkoutPlan
+    {
+        public List<DailyWorkout> Days { get; set; } = new();
+    }
+    public class DailyWorkout
+    {
+        public string DayOfWeek { get; set; } = string.Empty; // "Sunday", "Monday", etc.
+
+        public List<Exercise> Warmup { get; set; } = new();
+        public List<Exercise> Main { get; set; } = new();
+        public List<Exercise> Cooldown { get; set; } = new();
     }
 }
