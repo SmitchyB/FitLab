@@ -30,6 +30,8 @@ namespace FitLab.Data
         // This method saves a user to the database.
         public User? LoadFirstUser()
         {
+            Debug.WriteLine("[LocalDatabaseService] LoadFirstUser called");
+
             using var db = new LiteDatabase(_dbPath); // Open the database file
 
             // Load the AppState from the *same db instance*

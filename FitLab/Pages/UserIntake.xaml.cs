@@ -204,9 +204,57 @@ namespace FitLab.Pages
                 return; // Exit the method if no item is selected
             }
 
-            StepWeight.Visibility = Visibility.Collapsed; // Hide the weight step
-            StepGoals.Visibility = Visibility.Visible; // Show the next step for goals input
+            StepWeight.Visibility = Visibility.Collapsed; //Sets Weight step to collapsed
+            StepBodyMeasurements.Visibility = Visibility.Visible; //Sets Body Measurements step to visible
+
         }
+        private void NextBodyMeasurements(object sender, RoutedEventArgs e)
+        {
+            double? Convert(string input)
+            {
+                if (!double.TryParse(input, out var val)) return null;
+                if (CmbMeasurementUnit.SelectedItem is ComboBoxItem selected && selected.Content?.ToString() == "Centimeters")
+                    return Conversions.CmToInches(val);
+                return val;
+            }
+
+            var entry = new WeeklyBodyMeasurement
+            {
+                Date = DateTime.UtcNow,
+                Chest = Convert(TxtChest.Text),
+                Waist = Convert(TxtWaist.Text),
+                Hips = Convert(TxtHips.Text),
+            };
+
+            if (ChkAdvancedMeasurements.IsChecked == true)
+            {
+                entry.Neck = Convert(TxtNeck.Text);
+                entry.Shoulders = Convert(TxtShoulders.Text);
+                entry.UpperArm = Convert(TxtUpperArm.Text);
+                entry.Forearm = Convert(TxtForearm.Text);
+                entry.Wrist = Convert(TxtWrists.Text);
+                entry.Thigh = Convert(TxtThighs.Text);
+                entry.Calf = Convert(TxtCalves.Text);
+                entry.Ankle = Convert(TxtAnkle.Text);
+            }
+
+            _newUser.BodyMeasurements ??= new List<WeeklyBodyMeasurement>();
+            _newUser.BodyMeasurements.Insert(0, entry);
+
+            StepBodyMeasurements.Visibility = Visibility.Collapsed;
+            StepGoals.Visibility = Visibility.Visible;
+        }
+
+        private void ChkAdvancedMeasurements_Checked(object sender, RoutedEventArgs e)
+        {
+            PanelAdvancedMeasurements.Visibility = Visibility.Visible;
+        }
+
+        private void ChkAdvancedMeasurements_Unchecked(object sender, RoutedEventArgs e)
+        {
+            PanelAdvancedMeasurements.Visibility = Visibility.Collapsed;
+        }
+
         // Event handler for the "Add Goal" button click(Week 3 update: changed timeframe to use an int input and a combo box for the unit)
         private void AddGoal(object sender, RoutedEventArgs e)
         {
@@ -445,6 +493,11 @@ namespace FitLab.Pages
                     Pictures = _intakePictures // Assign the list of intake pictures to the WeeklyProgress entry
                 });
             }
+            if (_newUser.BodyMeasurements.Count > 0)
+            {
+                _newUser.BodyMeasurements[0].Date = _newUser.CreatedOn;
+            }
+
             if (_newUser.Goals.Count > 0) // If the user has entered any goals
             {
                 foreach (var goal in _newUser.Goals) // Iterate through each goal

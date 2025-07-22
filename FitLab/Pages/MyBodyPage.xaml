@@ -107,6 +107,66 @@
                         Width="100"/>
                 </StackPanel>
             </Border>
+            <!-- Body Measurements -->
+            <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,10,0,0">
+                <StackPanel x:Name="PanelMeasurements">
+                    <TextBlock Text="Weekly Body Measurements" FontSize="18" FontWeight="Bold" Foreground="#9a42ff" Margin="0,0,0,10"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+                        <Button Content="⟵" Width="30" Click="BtnMeasurementWeekBack_Click"/>
+                        <TextBlock x:Name="TxtMeasurementWeek" Text="Week 0" Foreground="#9a42ff" VerticalAlignment="Center" Margin="10,0" FontWeight="Bold"/>
+
+                        <Button Content="⟶" Width="30" Margin="10,0,0,0" Click="BtnMeasurementWeekForward_Click"/>
+
+                        <ComboBox x:Name="CmbMeasurementUnit" Width="100" Margin="15,0,0,0" SelectionChanged="CmbMeasurementUnit_SelectionChanged">
+                            <ComboBoxItem Content="Inches" IsSelected="True"/>
+                            <ComboBoxItem Content="Centimeters"/>
+                        </ComboBox>
+                    </StackPanel>
+                    <!-- Basic Inputs -->
+                    <StackPanel Orientation="Vertical" Margin="0,0,0,10">
+                        <TextBlock Text="Chest - Measure around the fullest part of your chest, keeping the tape level." Foreground="#9a42ff"/>
+                        <TextBox x:Name="TxtChest" Margin="0,2,0,10"/>
+
+                        <TextBlock Text="Waist - Measure around your natural waistline, typically above your belly button." Foreground="#9a42ff"/>
+                        <TextBox x:Name="TxtWaist" Margin="0,2,0,10"/>
+
+                        <TextBlock Text="Hips - Measure around the widest part of your hips/glutes." Foreground="#9a42ff"/>
+                        <TextBox x:Name="TxtHips" Margin="0,2,0,10"/>
+                    </StackPanel>
+
+                    <!-- Advanced Toggle -->
+                    <CheckBox x:Name="ChkAdvancedMeasurements" Content="Advanced Measurement Tracking" Foreground="#9a42ff" Margin="0,0,0,10" Checked="ChkAdvancedMeasurements_Checked" Unchecked="ChkAdvancedMeasurements_Unchecked"/>
+
+                    <!-- Advanced Section -->
+                    <StackPanel x:Name="PanelAdvancedMeasurements" Visibility="Collapsed">
+                        <TextBlock Text="Neck - Measure around the middle of the neck." Foreground="#9a42ff"/>
+                        <TextBox x:Name="TxtNeck" Margin="0,2,0,10"/>
+
+                        <TextBlock Text="Shoulders - Measure around the widest part of the shoulders." Foreground="#9a42ff"/>
+                        <TextBox x:Name="TxtShoulders" Margin="0,2,0,10"/>
+
+                        <TextBlock Text="Upper Arm - Measure around the thickest part of your bicep with arm relaxed." Foreground="#9a42ff"/>
+                        <TextBox x:Name="TxtUpperArm" Margin="0,2,0,10"/>
+
+                        <TextBlock Text="Forearm - Measure around the largest part of your forearm." Foreground="#9a42ff"/>
+                        <TextBox x:Name="TxtForearm" Margin="0,2,0,10"/>
+
+                        <TextBlock Text="Wrist - Measure just above the wrist bone." Foreground="#9a42ff"/>
+                        <TextBox x:Name="TxtWrist" Margin="0,2,0,10"/>
+
+                        <TextBlock Text="Thigh - Measure around the top of your thigh just below the groin." Foreground="#9a42ff"/>
+                        <TextBox x:Name="TxtThigh" Margin="0,2,0,10"/>
+
+                        <TextBlock Text="Calf - Measure the thickest part of your calf." Foreground="#9a42ff"/>
+                        <TextBox x:Name="TxtCalf" Margin="0,2,0,10"/>
+
+                        <TextBlock Text="Ankle - Measure just above the ankle bone." Foreground="#9a42ff"/>
+                        <TextBox x:Name="TxtAnkle" Margin="0,2,0,10"/>
+                    </StackPanel>
+
+                    <Button x:Name="BtnMeasurementSave" Content="Save Measurements" Margin="0,10,0,0" Background="#9a42ff" Foreground="White" Click="BtnMeasurementSave_Click"/>
+                </StackPanel>
+            </Border>
             <!-- Section: Goals -->
             <Border BorderBrush="#9a42ff" BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,10,0,0">
                 <StackPanel>

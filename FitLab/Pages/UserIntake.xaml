@@ -88,8 +88,60 @@
                 <TextBox x:Name="TxtWeight" Width="200" HorizontalAlignment="Center" Foreground="#9a42ff"/>
                 <Button Content="Next" Width="100" Margin="0,10,0,0" HorizontalAlignment="Center" Click="NextWeight"/>
             </StackPanel>
-            
-            <!-- Step 6: Goals -->
+            <!-- Step 6: Body Measurements -->
+            <StackPanel x:Name="StepBodyMeasurements" Visibility="Collapsed" Margin="0,20,0,0">
+                <TextBlock Text="Weekly Body Measurements (Week 0)" FontWeight="Bold" FontSize="16" Foreground="#9a42ff" Margin="0,0,0,10" />
+                <ComboBox x:Name="CmbMeasurementUnit" SelectedIndex="0" Margin="0,0,0,10">
+                    <ComboBoxItem Content="Inches"/>
+                    <ComboBoxItem Content="Centimeters"/>
+                </ComboBox>
+                <!-- Advanced Toggle -->
+                <CheckBox x:Name="ChkAdvancedMeasurements" Content="Advanced Measurement Tracking" Foreground="#9a42ff" Margin="0,0,0,10"
+              Checked="ChkAdvancedMeasurements_Checked" Unchecked="ChkAdvancedMeasurements_Unchecked"/>
+                
+                <!-- Basic Inputs -->
+                <StackPanel>
+                    <TextBlock Text="Chest - Measure around the fullest part of your chest." Foreground="#9a42ff" />
+                    <TextBox x:Name="TxtChest" Margin="0,0,0,5" />
+
+                    <TextBlock Text="Waist - Measure at the narrowest part of your torso, just above your belly button." Foreground="#9a42ff" />
+                    <TextBox x:Name="TxtWaist" Margin="0,0,0,5" />
+
+                    <TextBlock Text="Hips - Measure at the widest part of your buttocks." Foreground="#9a42ff" />
+                    <TextBox x:Name="TxtHips" Margin="0,0,0,5" />
+                </StackPanel>
+
+                <!-- Advanced Inputs -->
+                <StackPanel x:Name="PanelAdvancedMeasurements" Visibility="Collapsed" Margin="0,10,0,0">
+                    <TextBlock Text="Neck - Measure at the base of the neck." Foreground="#9a42ff" />
+                    <TextBox x:Name="TxtNeck" Margin="0,0,0,5" />
+
+                    <TextBlock Text="Shoulders - Measure around the broadest part of your shoulders." Foreground="#9a42ff" />
+                    <TextBox x:Name="TxtShoulders" Margin="0,0,0,5" />
+
+                    <TextBlock Text="Upper Arm - Measure around the largest part of your upper arm (biceps/triceps)." Foreground="#9a42ff" />
+                    <TextBox x:Name="TxtUpperArm" Margin="0,0,0,5" />
+
+                    <TextBlock Text="Forearm - Measure around the thickest part of your forearm." Foreground="#9a42ff" />
+                    <TextBox x:Name="TxtForearm" Margin="0,0,0,5" />
+
+                    <TextBlock Text="Wrists - Measure just above the wrist bone." Foreground="#9a42ff" />
+                    <TextBox x:Name="TxtWrists" Margin="0,0,0,5" />
+
+                    <TextBlock Text="Thighs - Measure around the widest part of your upper leg." Foreground="#9a42ff" />
+                    <TextBox x:Name="TxtThighs" Margin="0,0,0,5" />
+
+                    <TextBlock Text="Calves - Measure at the widest point of your calf." Foreground="#9a42ff" />
+                    <TextBox x:Name="TxtCalves" Margin="0,0,0,5" />
+
+                    <TextBlock Text="Ankle - Measure above the ankle bone." Foreground="#9a42ff" />
+                    <TextBox x:Name="TxtAnkle" Margin="0,0,0,5" />
+                </StackPanel>
+
+                <Button Content="Next" Click="NextBodyMeasurements" Background="#9a42ff" Foreground="White" HorizontalAlignment="Right" Margin="0,10,0,0" />
+            </StackPanel>
+
+            <!-- Step 7: Goals -->
             <StackPanel x:Name="StepGoals" Visibility="Collapsed">
                 <TextBlock Text="Add your goals:" FontSize="20" Margin="0,0,0,10" TextAlignment="Center" Foreground="#9a42ff"/>
                 <TextBlock Text="Goal Description:" FontSize="12" Foreground="#9a42ff" Margin="0,0,0,2"/>
@@ -111,7 +163,7 @@
                 <Button Content="Next" Width="100" Margin="0,10,0,0" HorizontalAlignment="Center" Click="NextGoals"/>
             </StackPanel>
 
-            <!-- Step 7: Before Pictures -->
+            <!-- Step 8: Before Pictures -->
             <StackPanel x:Name="StepPictures" Visibility="Collapsed" Width="700">
                 <TextBlock Text="Upload your before pictures:" FontSize="20" Margin="0,0,0,10" TextAlignment="Center" Foreground="#9a42ff"/>
                 <WrapPanel HorizontalAlignment="Center">

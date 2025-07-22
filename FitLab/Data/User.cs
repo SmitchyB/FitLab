@@ -15,6 +15,7 @@
         public List<DailyWaterIntake> WaterIntake { get; set; } = new(); // User's daily water intake records
         public List<DailyFoodIntake> FoodIntake { get; set; } = new(); // User's daily food intake records
         public List<WeeklyProgress> WeeklyProgressPictures { get; set; } = new(); // User's weekly progress pictures
+        public List<WeeklyBodyMeasurement> BodyMeasurements { get; set; } = new();
         public WorkoutPlan WorkoutPlan { get; set; } = new();
 
     }
@@ -72,6 +73,22 @@
     {
         public List<ProgressPicture> Pictures { get; set; } = new(); // List of pictures taken for that week
     }
+    public class WeeklyBodyMeasurement
+    {
+        public DateTime Date { get; set; } // Week start date
+        public double? Chest { get; set; }
+        public double? Waist { get; set; }
+        public double? Hips { get; set; }
+        public double? Neck { get; set; }
+        public double? Shoulders { get; set; }
+        public double? UpperArm { get; set; }
+        public double? Forearm { get; set; }
+        public double? Wrist { get; set; }
+        public double? Thigh { get; set; }
+        public double? Calf { get; set; }
+        public double? Ankle { get; set; }
+    }
+
     public class WorkoutPlan
     {
         public List<DailyWorkout> Days { get; set; } = new();

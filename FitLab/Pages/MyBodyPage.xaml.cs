@@ -1,7 +1,9 @@
 ﻿using FitLab.AppState;
+using FitLab.Components;
 using FitLab.Data;
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
@@ -25,14 +27,18 @@ namespace FitLab.Pages
         private readonly string _uploadsFolder = @"A:\DotNetApps\FitLab\FitLab\Uploads";
         private WeeklyProgress? _currentWeekProgress = null;
         private int _currentPictureWeek = 0;
+        private int _currentMeasurementWeek = 0;
+        private string _currentMeasurementUnit = "Inches";
+
         public MyBodyPage()
         {
             InitializeComponent(); // Initialize the page components
             CmbWeightUnit.SelectionChanged += CmbWeightUnit_SelectionChanged; // Event handler for weight unit selection change
-
+            CmbMeasurementUnit.SelectionChanged += CmbMeasurementUnit_SelectionChanged;
             // Load user from DB
             _user = _db.LoadFirstUser() ?? new User(); // Load the first user from the database or create a new user if none exists
             _currentWeightWeek = FitLab.AppState.SessionState.CurrentWeek; //Week 3 update: Set the current weight week based on the session state week # calculated on start of app
+            _currentMeasurementWeek = FitLab.AppState.SessionState.CurrentWeek;
 
             // Populate fields
             TxtName.Text = _user.Name; // User's name
@@ -66,6 +72,9 @@ namespace FitLab.Pages
             LoadMealsForDate(DateTime.Today); // Load meals for today
             LoadBeforePictures(); // Load before pictures for the user
             LoadCurrentPictureWeek(); // Load the current picture week to display progress pictures
+            _user.BodyMeasurements ??= new List<WeeklyBodyMeasurement>();
+            UpdateMeasurementDisplay();
+
         }
         // This method updates the height display based on the selected unit and the user's height in inches.
         private void UpdateHeightDisplay(double heightInches)
@@ -826,5 +835,116 @@ namespace FitLab.Pages
                 LoadCurrentPictureWeek(); // Load the current picture week to update the UI with the newly uploaded picture
             }
         }
+
+        private void UpdateMeasurementDisplay()
+        {
+            Debug.WriteLine($"UpdateMeasurementDisplay called. _user is null? {_user == null}");
+
+            TxtMeasurementWeek.Text = $"Week {_currentMeasurementWeek}";
+            if (_user == null)
+            {
+                Debug.WriteLine("UpdateMeasurementDisplay aborted — _user is null");
+                return;
+            }
+            var date = _user.CreatedOn.Date.AddDays(_currentMeasurementWeek * 7);
+
+            var entry = _user.BodyMeasurements.FirstOrDefault(x => x.Date.Date == date);
+            bool editable = _currentMeasurementWeek == SessionState.CurrentWeek && entry == null;
+
+            void SetField(TextBox box, double? val)
+            {
+                box.IsReadOnly = !editable;
+                box.Text = val.HasValue
+                    ? (_currentMeasurementUnit == "Centimeters"
+                        ? Math.Round(Conversions.InchesToCm(val.Value), 1).ToString()
+                        : Math.Round(val.Value, 1).ToString())
+                    : "";
+            }
+
+            SetField(TxtChest, entry?.Chest);
+            SetField(TxtWaist, entry?.Waist);
+            SetField(TxtHips, entry?.Hips);
+            SetField(TxtNeck, entry?.Neck);
+            SetField(TxtShoulders, entry?.Shoulders);
+            SetField(TxtUpperArm, entry?.UpperArm);
+            SetField(TxtForearm, entry?.Forearm);
+            SetField(TxtWrist, entry?.Wrist);
+            SetField(TxtThigh, entry?.Thigh);
+            SetField(TxtCalf, entry?.Calf);
+            SetField(TxtAnkle, entry?.Ankle);
+
+            BtnMeasurementSave.Visibility = editable ? Visibility.Visible : Visibility.Collapsed;
+        }
+        private void BtnMeasurementSave_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentMeasurementWeek != SessionState.CurrentWeek)
+            {
+                MessageBox.Show("You can only submit for the current week.");
+                return;
+            }
+
+            DateTime date = _user.CreatedOn.Date.AddDays(_currentMeasurementWeek * 7);
+
+            double? ParseBox(TextBox box)
+            {
+                return double.TryParse(box.Text.Trim(), out double val)
+                    ? (_currentMeasurementUnit == "Centimeters" ? Conversions.CmToInches(val) : val)
+                    : null;
+            }
+
+            var newEntry = new WeeklyBodyMeasurement
+            {
+                Date = date,
+                Chest = ParseBox(TxtChest),
+                Waist = ParseBox(TxtWaist),
+                Hips = ParseBox(TxtHips),
+                Neck = ParseBox(TxtNeck),
+                Shoulders = ParseBox(TxtShoulders),
+                UpperArm = ParseBox(TxtUpperArm),
+                Forearm = ParseBox(TxtForearm),
+                Wrist = ParseBox(TxtWrist),
+                Thigh = ParseBox(TxtThigh),
+                Calf = ParseBox(TxtCalf),
+                Ankle = ParseBox(TxtAnkle)
+            };
+
+            _user.BodyMeasurements.Add(newEntry);
+            _db.SaveUser(_user);
+            UpdateMeasurementDisplay();
+        }
+
+
+        private void BtnMeasurementWeekBack_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentMeasurementWeek > 0)
+                _currentMeasurementWeek--;
+
+            UpdateMeasurementDisplay();
+        }
+
+        private void BtnMeasurementWeekForward_Click(object sender, RoutedEventArgs e)
+        {
+            _currentMeasurementWeek++;
+            UpdateMeasurementDisplay();
+        }
+        private void ChkAdvancedMeasurements_Checked(object sender, RoutedEventArgs e)
+        {
+            PanelAdvancedMeasurements.Visibility = Visibility.Visible;
+        }
+
+        private void ChkAdvancedMeasurements_Unchecked(object sender, RoutedEventArgs e)
+        {
+            PanelAdvancedMeasurements.Visibility = Visibility.Collapsed;
+        }
+
+        private void CmbMeasurementUnit_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (CmbMeasurementUnit.SelectedItem is ComboBoxItem selected)
+                _currentMeasurementUnit = selected.Content?.ToString() ?? "Inches";
+
+            UpdateMeasurementDisplay();
+        }
+
+
     }
 }
