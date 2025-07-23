@@ -2,37 +2,36 @@
 using FitLab.AppState;
 using FitLab.Components;
 using FitLab.Data;
+using FitLab.Helpers;
 using System.Diagnostics;
-using System.Reflection.PortableExecutable;
 using System.Windows;
 
 namespace FitLab
 {
     public partial class MainWindow : Window
     {
-        //Main Window constructor
         public MainWindow()
         {
-            InitializeComponent(); // Initialize the main window components
+            InitializeComponent();
 
-            var db = new LocalDatabaseService(); // Create an instance of the LocalDatabaseService to interact with the database
-            var user = db.LoadFirstUser(); // Load the first user from the database
+            var db = new LocalDatabaseService();
+            var user = db.LoadFirstUser();
+
             GlobalCache.AllExercises = LocalDatabaseService.LoadExercises();
             Debug.WriteLine($"[INIT] Preloaded {GlobalCache.AllExercises.Count} exercises.");
 
-            if (user != null) // Check if a user was successfully loaded
+            if (user != null)
             {
-                SessionState.CurrentWeek = CalculateCurrentWeek.GetWeekNumber( //Week 3 update: Calculate the current week number based on the user's creation date and local time zone
-                    user.CreatedOn,
-                    TimeZoneInfo.Local
-                );
-                Header.Visibility = Visibility.Visible; // Show the header if a user is loaded
-                MainFrame.Navigate(new Pages.HomePage()); // Navigate to the HomePage if a user is loaded
+                SessionState.CurrentWeek = CalculateCurrentWeek.GetWeekNumber(user.CreatedOn, TimeZoneInfo.Local);
+                SessionState.CurrentWorkoutDay = CalculateCurrentDay.GetCurrentDayNumber(user.CreatedOn, user.WorkoutPlan.PlanLength);
+
+                Header.Visibility = Visibility.Visible;
+                MainFrame.Navigate(new Pages.HomePage());
             }
-            else // If no user is loaded
+            else
             {
-                Header.Visibility = Visibility.Collapsed; // Hide the header
-                MainFrame.Navigate(new Pages.UserIntake()); // Navigate to the UserIntake page to allow user creation
+                Header.Visibility = Visibility.Collapsed;
+                MainFrame.Navigate(new Pages.UserIntake());
             }
         }
     }

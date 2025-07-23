@@ -1,191 +1,136 @@
 ﻿using FitLab.AppState;
 using FitLab.Components;
 using FitLab.Data;
+using FitLab.Helpers;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Media;
 
 namespace FitLab.Pages
 {
     public partial class WorkoutPlanPage : Page
     {
-        private User _currentUser = new();
+        private User _user = null!;
+        private bool _isEditing = false;
 
         public WorkoutPlanPage()
         {
             InitializeComponent();
-            LoadUserAndRefresh();
+            LoadUserData();
+            RenderPlan();
         }
 
-        private void LoadUserAndRefresh()
+        private void LoadUserData()
         {
-            Debug.WriteLine("[WorkoutPlanPage] Loading user...");
-            var currentUserId = new LocalDatabaseService().LoadCurrentUserId();
-            var loadedUser = currentUserId.HasValue ? new LocalDatabaseService().LoadFirstUser() : null;
-            _currentUser = loadedUser ?? throw new InvalidOperationException("Failed to load user.");
-
-            _currentUser.WorkoutPlan ??= new WorkoutPlan();
-
-            Debug.WriteLine($"[WorkoutPlanPage] Loaded user with {_currentUser.WorkoutPlan.Days.Count} workout days.");
-            RefreshAllDays();
+            var db = new LocalDatabaseService();
+            _user = db.LoadFirstUser() ?? new User();
+            _user.WorkoutPlan ??= new WorkoutPlan { PlanLength = 7 };
         }
 
-        private void AddExercise_Click(object sender, RoutedEventArgs e)
+        private void RenderPlan()
         {
-            if (sender is not Button button) return;
-
-            var parent = button.Parent;
-            if (parent is StackPanel panel && panel.Parent is Border border)
+            DailyPlanItems.Items.Clear();
+            CycleLengthDropdown.SelectedIndex = _user.WorkoutPlan.PlanLength switch
             {
-                var expander = VisualTreeHelper.GetParent(border);
-                while (expander is not Expander && expander != null)
-                    expander = VisualTreeHelper.GetParent(expander);
-
-                if (expander is Expander exp)
-                {
-                    string day = exp.Header?.ToString() ?? "";
-                    string section = "";
-
-                    foreach (var child in panel.Children)
-                    {
-                        if (child is TextBlock tb && tb.Text is string label)
-                        {
-                            if (label.Contains("Warmup")) section = "Warmup";
-                            else if (label.Contains("Main")) section = "Main";
-                            else if (label.Contains("Cooldown")) section = "Cooldown";
-                        }
-                    }
-
-                    Debug.WriteLine($"[WorkoutPlanPage] Opening modal for {day} - {section}");
-
-                    if (string.IsNullOrEmpty(day) || string.IsNullOrEmpty(section))
-                    {
-                        Debug.WriteLine("[WorkoutPlanPage] Missing day or section, aborting modal.");
-                        return;
-                    }
-
-                    var modal = new ExerciseModal(day, section);
-                    bool? result = modal.ShowDialog();
-
-                    if (result == true)
-                    {
-                        Debug.WriteLine("[WorkoutPlanPage] Modal returned true, refreshing data from DB.");
-                        LoadUserAndRefresh();
-                    }
-                }
-            }
-        }
-
-        private void RefreshAllDays()
-        {
-            foreach (var day in _currentUser.WorkoutPlan.Days.Select(d => d.DayOfWeek))
-            {
-                Debug.WriteLine($"[WorkoutPlanPage] Refreshing day: {day}");
-                RefreshUIForDay(day);
-            }
-        }
-
-        private void RefreshUIForDay(string day)
-        {
-            var daily = _currentUser.WorkoutPlan.Days.FirstOrDefault(d => d.DayOfWeek == day);
-            if (daily == null)
-            {
-                Debug.WriteLine($"[WorkoutPlanPage] No daily workout found for {day}");
-                return;
-            }
-
-            string[] sections = new[] { "Warmup", "Main", "Cooldown" };
-
-            foreach (var section in sections)
-            {
-                var itemsControl = FindName($"{day}{section}Exercises") as ItemsControl;
-                if (itemsControl == null)
-                {
-                    Debug.WriteLine($"[WorkoutPlanPage] Could not find ItemsControl for {day}{section}Exercises");
-                    continue;
-                }
-
-                List<Exercise>? exercises = section switch
-                {
-                    "Warmup" => daily.Warmup,
-                    "Main" => daily.Main,
-                    "Cooldown" => daily.Cooldown,
-                    _ => null
-                };
-
-                itemsControl.Items.Clear();
-
-                if (exercises == null || exercises.Count == 0)
-                {
-                    Debug.WriteLine($"[WorkoutPlanPage] {day} - {section} is empty.");
-                    continue;
-                }
-
-                Debug.WriteLine($"[WorkoutPlanPage] {day} - {section} has {exercises.Count} exercises.");
-
-                foreach (var exercise in exercises)
-                {
-                    var container = new Border
-                    {
-                        Margin = new Thickness(5),
-                        BorderBrush = Brushes.MediumPurple,
-                        BorderThickness = new Thickness(1),
-                        CornerRadius = new CornerRadius(6),
-                        Padding = new Thickness(8)
-                    };
-
-                    var stack = new StackPanel();
-
-                    var deleteBtn = new Button
-                    {
-                        Content = "❌",
-                        HorizontalAlignment = HorizontalAlignment.Right,
-                        Width = 25,
-                        Height = 25,
-                        Tag = exercise.Guid
-                    };
-                    deleteBtn.Click += (s, e) => DeleteExercise(day, section, (Guid)((Button)s).Tag);
-                    stack.Children.Add(deleteBtn);
-
-                    stack.Children.Add(new TextBlock { Text = $"Name: {exercise.Name}", FontWeight = FontWeights.Bold });
-                    stack.Children.Add(new TextBlock { Text = $"Muscle Group: {exercise.MuscleGroup}" });
-                    stack.Children.Add(new TextBlock { Text = $"Difficulty: {exercise.Difficulty}" });
-                    stack.Children.Add(new TextBlock { Text = $"Type: {string.Join(", ", exercise.Type)}" });
-                    stack.Children.Add(new TextBlock { Text = $"Equipment: {string.Join(", ", exercise.Equipment)}" });
-                    stack.Children.Add(new TextBlock { Text = $"Description: {exercise.Description}", TextWrapping = TextWrapping.Wrap });
-
-                    container.Child = stack;
-                    itemsControl.Items.Add(container);
-                }
-            }
-        }
-
-        private void DeleteExercise(string day, string section, Guid guid)
-        {
-            var daily = _currentUser.WorkoutPlan.Days.FirstOrDefault(d => d.DayOfWeek == day);
-            if (daily == null) return;
-
-            var list = section switch
-            {
-                "Warmup" => daily.Warmup,
-                "Main" => daily.Main,
-                "Cooldown" => daily.Cooldown,
-                _ => null
+                7 => 0,
+                10 => 1,
+                14 => 2,
+                _ => 0
             };
 
-            if (list == null) return;
-
-            var target = list.FirstOrDefault(e => e.Guid == guid);
-            if (target != null)
+            for (int i = 1; i <= _user.WorkoutPlan.PlanLength; i++)
             {
-                list.Remove(target);
-                new LocalDatabaseService().SaveUser(_currentUser);
-                RefreshUIForDay(day);
+                var day = _user.WorkoutPlan.Days.FirstOrDefault(d => d.DayNumber == i);
+                if (day == null)
+                {
+                    day = new DailyWorkout { DayNumber = i };
+                    _user.WorkoutPlan.Days.Add(day);
+                }
+
+                var control = new DailyExercisePlanner(day, _isEditing);
+                DailyPlanItems.Items.Add(control);
+            }
+        }
+
+        private void EditButton_Click(object sender, RoutedEventArgs e)
+        {
+            _isEditing = true;
+            EditButton.Visibility = Visibility.Collapsed;
+            SaveButton.Visibility = Visibility.Visible;
+            CancelButton.Visibility = Visibility.Visible;
+            CycleLengthDropdown.IsEnabled = true;
+            RenderPlan();
+        }
+
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            _isEditing = false;
+            LoadUserData();
+            SaveButton.Visibility = Visibility.Collapsed;
+            CancelButton.Visibility = Visibility.Collapsed;
+            EditButton.Visibility = Visibility.Visible;
+            CycleLengthDropdown.IsEnabled = false;
+            RenderPlan();
+        }
+
+        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (CycleLengthDropdown.SelectedItem is ComboBoxItem selected && int.TryParse(selected.Content.ToString(), out int newLength))
+            {
+                _user.WorkoutPlan.PlanLength = newLength;
+                _user.WorkoutPlan.Days = _user.WorkoutPlan.Days.Where(d => d.DayNumber <= newLength).ToList();
+            }
+
+            foreach (DailyExercisePlanner planner in DailyPlanItems.Items)
+            {
+                if (!planner.ValidateDay())
+                {
+                    MessageBox.Show($"Day {planner.Day.DayNumber} must be marked as Rest or have at least one exercise.");
+                    return;
+                }
+            }
+
+            var db = new LocalDatabaseService();
+            db.SaveUser(_user);
+
+            // 🔁 Update session workout day number based on created date + new cycle length
+            SessionState.CurrentWorkoutDay = CalculateCurrentDay.GetCurrentDayNumber(
+                _user.CreatedOn,
+                _user.WorkoutPlan.PlanLength
+            );
+
+            _isEditing = false;
+            SaveButton.Visibility = Visibility.Collapsed;
+            CancelButton.Visibility = Visibility.Collapsed;
+            EditButton.Visibility = Visibility.Visible;
+            CycleLengthDropdown.IsEnabled = false;
+            RenderPlan();
+        }
+
+        private void CycleLengthDropdown_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isEditing || CycleLengthDropdown.SelectedItem is not ComboBoxItem selected) return;
+
+            if (int.TryParse(selected.Content.ToString(), out int newLength))
+            {
+                _user.WorkoutPlan.PlanLength = newLength;
+
+                // Add missing days
+                for (int i = 1; i <= newLength; i++)
+                {
+                    if (!_user.WorkoutPlan.Days.Any(d => d.DayNumber == i))
+                        _user.WorkoutPlan.Days.Add(new DailyWorkout { DayNumber = i });
+                }
+
+                // Trim days beyond plan length
+                _user.WorkoutPlan.Days = _user.WorkoutPlan.Days
+                    .Where(d => d.DayNumber <= newLength)
+                    .OrderBy(d => d.DayNumber)
+                    .ToList();
+
+                RenderPlan();
             }
         }
 

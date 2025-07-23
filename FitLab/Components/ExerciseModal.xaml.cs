@@ -14,7 +14,7 @@ namespace FitLab.Components
     {
         public Exercise? SelectedExercise { get; private set; }
 
-        private readonly string _day;
+        private readonly int _dayNumber;
         private readonly string _section;
 
         private readonly List<Exercise> _allExercises = new();
@@ -24,11 +24,11 @@ namespace FitLab.Components
         private readonly HashSet<string> selectedDifficulties = new();
         private readonly HashSet<string> selectedTypes = new();
 
-        public ExerciseModal(string day, string section)
+        public ExerciseModal(int dayNumber, string section)
         {
             InitializeComponent();
 
-            _day = day;
+            _dayNumber = dayNumber;
             _section = section;
 
             GlobalCache.Reload();
@@ -106,55 +106,9 @@ namespace FitLab.Components
             }
 
             SelectedExercise = selected;
-            Debug.WriteLine($"[ExerciseModal] Selected: {selected.Name}");
-            Debug.WriteLine($"[ExerciseModal] Target: {_day} - {_section}");
-
-            var db = new LocalDatabaseService();
-            var user = db.LoadFirstUser();
-
-            if (user == null)
-            {
-                Debug.WriteLine("[ExerciseModal] Failed to load user.");
-                MessageBox.Show("Failed to load user.");
-                return;
-            }
-
-            user.WorkoutPlan ??= new WorkoutPlan();
-
-            var dayEntry = user.WorkoutPlan.Days.FirstOrDefault(d => d.DayOfWeek == _day);
-            if (dayEntry == null)
-            {
-                Debug.WriteLine($"[ExerciseModal] Creating new DailyWorkout for {_day}");
-                dayEntry = new DailyWorkout { DayOfWeek = _day };
-                user.WorkoutPlan.Days.Add(dayEntry);
-            }
-
-            List<Exercise>? targetList = _section switch
-            {
-                "Warmup" => dayEntry.Warmup,
-                "Main" => dayEntry.Main,
-                "Cooldown" => dayEntry.Cooldown,
-                _ => null
-            };
-
-            if (targetList == null)
-            {
-                Debug.WriteLine($"[ExerciseModal] Invalid section: {_section}");
-                MessageBox.Show($"Unknown section: {_section}");
-                return;
-            }
-
-            Debug.WriteLine($"[ExerciseModal] Before add: {targetList.Count} exercises");
-            targetList.Add(selected);
-            Debug.WriteLine($"[ExerciseModal] After add: {targetList.Count} exercises");
-
-            db.SaveUser(user);
-            Debug.WriteLine("[ExerciseModal] User saved with updated workout plan.");
-
             DialogResult = true;
             Close();
         }
-
 
         private void PopulateCreateTabDropdowns()
         {

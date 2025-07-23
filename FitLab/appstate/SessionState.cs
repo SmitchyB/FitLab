@@ -9,5 +9,6 @@ namespace FitLab.AppState
     public static class SessionState
     {
         public static int CurrentWeek { get; set; }
+        public static int CurrentWorkoutDay { get; set; }
     }
 }

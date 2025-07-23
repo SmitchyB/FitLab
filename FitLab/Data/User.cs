@@ -1,4 +1,6 @@
-﻿namespace FitLab.Data
+﻿using System.Collections.ObjectModel;
+
+namespace FitLab.Data
 {
     // User data model
     public class User
@@ -91,14 +93,18 @@
 
     public class WorkoutPlan
     {
+        public int PlanLength { get; set; } = 7;
         public List<DailyWorkout> Days { get; set; } = new();
     }
+
     public class DailyWorkout
     {
-        public string DayOfWeek { get; set; } = string.Empty; // "Sunday", "Monday", etc.
-
-        public List<Exercise> Warmup { get; set; } = new();
-        public List<Exercise> Main { get; set; } = new();
-        public List<Exercise> Cooldown { get; set; } = new();
+        public int DayNumber { get; set; }
+        public bool IsRestDay { get; set; } = false;
+        public ObservableCollection<Exercise> Warmup { get; set; } = new();
+        public ObservableCollection<Exercise> Main { get; set; } = new();
+        public ObservableCollection<Exercise> Cooldown { get; set; } = new();
     }
+
+
 }

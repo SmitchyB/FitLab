@@ -37123,20 +37123,6 @@
     ]
   },
   {
-    "guid": "bebb8d0a-5fa9-454a-8f97-3ea5956b2984",
-    "name": "Bosu Ball Toe Tap",
-    "muscleGroup": "Bosu-Ball",
-    "equipment": [
-      "Bosu-Ball"
-    ],
-    "difficulty": "Beginner",
-    "description": "The Bosu Ball Toe Tap is a beginner-level exercise where you lightly tap your toes on the sides of a Bosu Ball, enhancing your balance and coordination.",
-    "type": [
-      "Balance",
-      "Coordination"
-    ]
-  },
-  {
     "guid": "c6900ab2-f890-44bd-8e6f-addc2e7568cd",
     "name": "Bosu Ball Up And Over",
     "muscleGroup": "Bosu-Ball",

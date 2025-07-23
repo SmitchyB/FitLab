@@ -1,0 +1,88 @@
+﻿<UserControl x:Class="FitLab.Components.DailyExercisePlanner"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:FitLab.Components"
+             x:Name="Root">
+    <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="8" Padding="10" Margin="0,0,0,20">
+        <StackPanel>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,10">
+                <TextBlock FontWeight="Bold" FontSize="16" Foreground="#9a42ff">
+                    <Run Text="Day " />
+                    <Run Text="{Binding DayNumber}" />
+                </TextBlock>
+                <CheckBox x:Name="RestDayCheckbox" Content="Rest Day"
+                          Foreground="#9a42ff" Margin="20,0,0,0"
+                          Checked="RestDayCheckbox_Checked"
+                          Unchecked="RestDayCheckbox_Unchecked" VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <TextBlock x:Name="RestDayMessage" Text="No workouts for today. Rest." 
+                       Foreground="#9a42ff" FontStyle="Italic" Visibility="Collapsed" />
+
+            <StackPanel x:Name="WorkoutSections">
+                <!-- Warmup -->
+                <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,10,0,10">
+                    <StackPanel>
+                        <TextBlock Text="Warmup" FontWeight="Bold" FontSize="14" Foreground="#9a42ff" />
+                        <ItemsControl x:Name="WarmupList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#9a42ff" BorderThickness="1" CornerRadius="4" Padding="5" Margin="5">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="White"/>
+                                            <TextBlock Text="{Binding MuscleGroup}" FontSize="12" Foreground="Gray"/>
+                                            <TextBlock Text="{Binding Difficulty}" FontSize="12" Foreground="Gray"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Button x:Name="WarmupAddButton" Content="+ Add Exercise" HorizontalAlignment="Left" Click="AddExercise_Click" Tag="Warmup" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Main -->
+                <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,10,0,10">
+                    <StackPanel>
+                        <TextBlock Text="Main Workout" FontWeight="Bold" FontSize="14" Foreground="#9a42ff" />
+                        <ItemsControl x:Name="MainList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#9a42ff" BorderThickness="1" CornerRadius="4" Padding="5" Margin="5">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="White"/>
+                                            <TextBlock Text="{Binding MuscleGroup}" FontSize="12" Foreground="Gray"/>
+                                            <TextBlock Text="{Binding Difficulty}" FontSize="12" Foreground="Gray"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Button x:Name="MainAddButton" Content="+ Add Exercise" HorizontalAlignment="Left" Click="AddExercise_Click" Tag="Main" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Cooldown -->
+                <Border BorderThickness="1" BorderBrush="#9a42ff" CornerRadius="6" Padding="10" Margin="0,10,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Cooldown" FontWeight="Bold" FontSize="14" Foreground="#9a42ff" />
+                        <ItemsControl x:Name="CooldownList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#9a42ff" BorderThickness="1" CornerRadius="4" Padding="5" Margin="5">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="White"/>
+                                            <TextBlock Text="{Binding MuscleGroup}" FontSize="12" Foreground="Gray"/>
+                                            <TextBlock Text="{Binding Difficulty}" FontSize="12" Foreground="Gray"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Button x:Name="CooldownAddButton" Content="+ Add Exercise" HorizontalAlignment="Left" Click="AddExercise_Click" Tag="Cooldown" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>
