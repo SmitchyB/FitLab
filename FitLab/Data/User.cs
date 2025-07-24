@@ -1,5 +1,5 @@
 ﻿using System.Collections.ObjectModel;
-
+using LiteDB;
 namespace FitLab.Data
 {
     // User data model
@@ -19,7 +19,7 @@ namespace FitLab.Data
         public List<WeeklyProgress> WeeklyProgressPictures { get; set; } = new(); // User's weekly progress pictures
         public List<WeeklyBodyMeasurement> BodyMeasurements { get; set; } = new();
         public WorkoutPlan WorkoutPlan { get; set; } = new();
-
+        public List<CompletedExercise> CompletedExercises { get; set; } = new();
     }
     // Weight Entry model for the Weight History
     public class WeightEntry
@@ -96,7 +96,6 @@ namespace FitLab.Data
         public int PlanLength { get; set; } = 7;
         public List<DailyWorkout> Days { get; set; } = new();
     }
-
     public class DailyWorkout
     {
         public int DayNumber { get; set; }
@@ -105,6 +104,35 @@ namespace FitLab.Data
         public ObservableCollection<Exercise> Main { get; set; } = new();
         public ObservableCollection<Exercise> Cooldown { get; set; } = new();
     }
+    public class CompletedExercise
+    {
+        public Guid ExerciseId { get; set; }
+        public List<DateTime> CompletionTimes { get; set; } = new();
 
+        // Required for casting to derived type manually after loading from LiteDB
+        public string SubType { get; set; } = string.Empty;
+    }
+
+
+    public class CompletedStrengthExercise : CompletedExercise
+    {
+        public List<int> Sets { get; set; } = new(); // Optional count, or could be tracked through RepsPerSet count
+        public List<int> RepsPerSet { get; set; } = new();
+        public List<double> WeightUsed { get; set; } = new();
+        public List<TimeSpan> RestBetweenSets { get; set; } = new();
+    }
+
+    public class CompletedCardioExercise : CompletedExercise
+    {
+        public List<TimeSpan> Durations { get; set; } = new();
+        public List<double> Distances { get; set; } = new();
+        public List<int> AvgHeartRates { get; set; } = new(); // Optional
+    }
+
+    public class CompletedFlexibilityExercise : CompletedExercise
+    {
+        public List<TimeSpan> HoldDurations { get; set; } = new();
+        public List<string> Notes { get; set; } = new(); // e.g., pain level, difficulty, range
+    }
 
 }
