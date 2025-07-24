@@ -15,6 +15,8 @@ namespace FitLab.Data
         public List<string> Equipment { get; set; } = new();
         public string Difficulty { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+        public List<string> TrackingMetrics { get; set; } = new();
     }
+
 
 }

@@ -73,7 +73,6 @@
             </TabItem>
 
 
-            <!-- CREATE TAB -->
             <TabItem Header="Create" Height="22" Margin="-2,-2,-2,0" VerticalAlignment="Top">
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
@@ -86,6 +85,8 @@
                         <RowDefinition Height="Auto"/>
                         <!-- Description -->
                         <RowDefinition Height="Auto"/>
+                        <!-- Tracking Metrics -->
+                        <RowDefinition Height="Auto"/>
                         <!-- Button -->
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
@@ -93,12 +94,10 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Exercise Name (full width) -->
+                    <!-- Exercise Name -->
                     <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,10">
                         <TextBlock Text="Exercise Name" Margin="0,0,0,4" Foreground="#9a42ff"/>
-                        <TextBox x:Name="ExerciseNameInput"
-                     BorderBrush="#9a42ff"
-                     BorderThickness="1"/>
+                        <TextBox x:Name="ExerciseNameInput" BorderBrush="#9a42ff" BorderThickness="1"/>
                     </StackPanel>
 
                     <!-- Muscle Group & Type -->
@@ -109,15 +108,11 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,10,0">
                             <TextBlock Text="Muscle Group" Margin="0,0,0,4" Foreground="#9a42ff"/>
-                            <ComboBox x:Name="MuscleInput"
-                        BorderBrush="#9a42ff"
-                        BorderThickness="1"/>
+                            <ComboBox x:Name="MuscleInput" BorderBrush="#9a42ff" BorderThickness="1"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1">
                             <TextBlock Text="Type" Margin="0,0,0,4" Foreground="#9a42ff"/>
-                            <ComboBox x:Name="TypeInput"
-                        BorderBrush="#9a42ff"
-                        BorderThickness="1"/>
+                            <ComboBox x:Name="TypeInput" BorderBrush="#9a42ff" BorderThickness="1"/>
                         </StackPanel>
                     </Grid>
 
@@ -129,42 +124,44 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,10,0">
                             <TextBlock Text="Equipment" Margin="0,0,0,4" Foreground="#9a42ff"/>
-                            <ComboBox x:Name="EquipmentInput"
-                        IsEditable="True"
-                        BorderBrush="#9a42ff"
-                        BorderThickness="1"/>
+                            <ComboBox x:Name="EquipmentInput" IsEditable="True" BorderBrush="#9a42ff" BorderThickness="1"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1">
                             <TextBlock Text="Difficulty" Margin="0,0,0,4" Foreground="#9a42ff"/>
-                            <ComboBox x:Name="DifficultyInput"
-                        BorderBrush="#9a42ff"
-                        BorderThickness="1"/>
+                            <ComboBox x:Name="DifficultyInput" BorderBrush="#9a42ff" BorderThickness="1"/>
                         </StackPanel>
                     </Grid>
 
-                    <!-- Description (full width) -->
+                    <!-- Description -->
                     <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Margin="0,0,0,10">
                         <TextBlock Text="Description" Margin="0,0,0,4" Foreground="#9a42ff"/>
-                        <TextBox   x:Name="DescriptionInput"
-                       Height="80"
-                       TextWrapping="Wrap"
-                       AcceptsReturn="True"
-                       BorderBrush="#9a42ff"
-                       BorderThickness="1"/>
+                        <TextBox x:Name="DescriptionInput"
+                     Height="80"
+                     TextWrapping="Wrap"
+                     AcceptsReturn="True"
+                     BorderBrush="#9a42ff"
+                     BorderThickness="1"/>
+                    </StackPanel>
+
+                    <!-- Tracking Metrics -->
+                    <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,0,10">
+                        <TextBlock Text="Tracking Metrics (select at least one)" Margin="0,0,0,4" Foreground="#9a42ff"/>
+                        <WrapPanel x:Name="TrackingMetricsPanel" />
                     </StackPanel>
 
                     <!-- Create Button -->
-                    <Button Grid.Row="4" Grid.Column="1"
-                  Content="Create Exercise"
-                  BorderBrush="#9a42ff"
-                  BorderThickness="1"
-                  Foreground="#9a42ff"
-                  Background="Transparent"
-                  Height="40"
-                  HorizontalAlignment="Right"
-                  Click="CreateExercise_Click"/>
+                    <Button Grid.Row="5" Grid.Column="1"
+                Content="Create Exercise"
+                BorderBrush="#9a42ff"
+                BorderThickness="1"
+                Foreground="#9a42ff"
+                Background="Transparent"
+                Height="40"
+                HorizontalAlignment="Right"
+                Click="CreateExercise_Click"/>
                 </Grid>
             </TabItem>
+
         </TabControl>
     </Grid>
 </Window>

@@ -23,38 +23,36 @@ namespace FitLab.Components
             TxtName.Text = _exercise.Name;
             TxtSection.Text = _section;
             TxtType.Text = string.Join(", ", _exercise.Type);
-            RenderInputsForTypes(_exercise.Type);
+            RenderInputsForTrackingMetrics(_exercise.TrackingMetrics);
         }
 
-        private void RenderInputsForTypes(List<string> types)
+        private void RenderInputsForTrackingMetrics(List<string> metrics)
         {
             InputPanel.Children.Clear();
 
-            foreach (var type in types)
+            foreach (var metric in metrics)
             {
-                switch (type)
+                string? label = metric switch
                 {
-                    case "Strength":
-                        InputPanel.Children.Add(CreateLabeledTextbox("Sets:"));
-                        InputPanel.Children.Add(CreateLabeledTextbox("Reps Per Set:"));
-                        InputPanel.Children.Add(CreateLabeledTextbox("Weight Used (lbs):"));
-                        InputPanel.Children.Add(CreateLabeledTextbox("Rest Between Sets (sec):"));
-                        break;
+                    "Sets" => "Sets:",
+                    "Reps Per Set" => "Reps Per Set:",
+                    "Weight Used" => "Weight Used (lbs):",
+                    "Rest Between Sets" => "Rest Between Sets (sec):",
+                    "RPE" => "RPE:",
+                    "Failure Reached" => "Failure Reached (true/false):",
+                    "Hold Duration" => "Hold Duration (seconds):",
+                    "Discomfort Level" => "Discomfort Level:",
+                    "Duration" => "Duration (minutes):",
+                    "Intensity" => "Intensity (1–10):",
+                    "Distance" => "Distance (miles):",
+                    "Speed" => "Speed (mph):",
+                    _ => null
+                };
 
-                    case "Cardio":
-                        InputPanel.Children.Add(CreateLabeledTextbox("Duration (minutes):"));
-                        InputPanel.Children.Add(CreateLabeledTextbox("Distance (miles):"));
-                        InputPanel.Children.Add(CreateLabeledTextbox("Average Heart Rate:"));
-                        break;
-
-                    case "Flexibility":
-                        InputPanel.Children.Add(CreateLabeledTextbox("Hold Duration (seconds):"));
-                        InputPanel.Children.Add(CreateLabeledTextbox("Notes:"));
-                        break;
-                }
+                if (label != null)
+                    InputPanel.Children.Add(CreateLabeledTextbox(label));
             }
         }
-
 
         private static StackPanel CreateLabeledTextbox(string label)
         {
@@ -77,72 +75,6 @@ namespace FitLab.Components
             return panel;
         }
 
-        private void Complete_Click(object sender, RoutedEventArgs e)
-        {
-            var db = new LocalDatabaseService();
-            var user = db.LoadFirstUser();
-            if (user == null || _exercise.Type.Count == 0) return;
-
-            // Use the first type as the primary one
-            string primaryType = _exercise.Type[0];
-
-            CompletedExercise? record = primaryType switch
-            {
-                "Strength" => BuildStrength(),
-                "Cardio" => BuildCardio(),
-                "Flexibility" => BuildFlexibility(),
-                _ => null
-            };
-
-
-            if (record == null) return;
-
-            record.ExerciseId = _exercise.Guid;
-            record.SubType = primaryType;
-            record.CompletionTimes.Add(DateTime.UtcNow);
-
-            user.CompletedExercises.Add(record);
-            db.SaveUser(user);
-
-            OnComplete?.Invoke();
-
-            Visibility = Visibility.Collapsed;
-        }
-
-
-        private CompletedStrengthExercise BuildStrength()
-        {
-            var inputs = GetTextBoxValues();
-            return new CompletedStrengthExercise
-            {
-                Sets = new List<int> { int.Parse(inputs["Sets:"]) },
-                RepsPerSet = new List<int> { int.Parse(inputs["Reps Per Set:"]) },
-                WeightUsed = new List<double> { double.Parse(inputs["Weight Used (lbs):"]) },
-                RestBetweenSets = new List<TimeSpan> { TimeSpan.FromSeconds(int.Parse(inputs["Rest Between Sets (sec):"])) }
-            };
-        }
-
-        private CompletedCardioExercise BuildCardio()
-        {
-            var inputs = GetTextBoxValues();
-            return new CompletedCardioExercise
-            {
-                Durations = new List<TimeSpan> { TimeSpan.FromMinutes(double.Parse(inputs["Duration (minutes):"])) },
-                Distances = new List<double> { double.Parse(inputs["Distance (miles):"]) },
-                AvgHeartRates = new List<int> { int.Parse(inputs["Average Heart Rate:"]) }
-            };
-        }
-
-        private CompletedFlexibilityExercise BuildFlexibility()
-        {
-            var inputs = GetTextBoxValues();
-            return new CompletedFlexibilityExercise
-            {
-                HoldDurations = new List<TimeSpan> { TimeSpan.FromSeconds(double.Parse(inputs["Hold Duration (seconds):"])) },
-                Notes = new List<string> { inputs.TryGetValue("Notes:", out var note) ? note ?? string.Empty : string.Empty }
-            };
-        }
-
         private Dictionary<string, string> GetTextBoxValues()
         {
             var map = new Dictionary<string, string>();
@@ -162,6 +94,42 @@ namespace FitLab.Components
             }
 
             return map;
+        }
+
+        private void Complete_Click(object sender, RoutedEventArgs e)
+        {
+            var db = new LocalDatabaseService();
+            var user = db.LoadFirstUser();
+            if (user == null) return;
+
+            var inputValues = GetTextBoxValues();
+
+            // Remove the colon from the label to use as clean key
+            var cleanedMetrics = inputValues.ToDictionary(
+                kv => kv.Key.TrimEnd(':'),
+                kv => kv.Value
+            );
+
+            var existing = user.CompletedExercises.FirstOrDefault(e => e.ExerciseId == _exercise.Guid);
+            if (existing == null)
+            {
+                existing = new CompletedExercise
+                {
+                    ExerciseId = _exercise.Guid,
+                    SubType = string.Join(", ", _exercise.Type)
+                };
+                user.CompletedExercises.Add(existing);
+            }
+
+            existing.Entries.Add(new CompletedExerciseEntry
+            {
+                DateCompleted = DateTime.UtcNow,
+                Metrics = cleanedMetrics
+            });
+
+            db.SaveUser(user);
+            OnComplete?.Invoke();
+            Visibility = Visibility.Collapsed;
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)

@@ -75,7 +75,7 @@ namespace FitLab.Data
             return System.Text.Json.JsonSerializer.Deserialize<List<Exercise>>(json, _jsonOptions) ?? new();
 
         }
-        public void SaveExercise(Exercise exercise)
+        public static void SaveExercise(Exercise exercise)
         {
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "exercises.json");
 

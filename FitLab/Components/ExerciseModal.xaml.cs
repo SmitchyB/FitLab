@@ -24,6 +24,22 @@ namespace FitLab.Components
         private readonly HashSet<string> selectedDifficulties = new();
         private readonly HashSet<string> selectedTypes = new();
 
+        private static readonly List<string> ValidTrackingMetrics = new()
+        {
+            "Sets",
+            "Reps Per Set",
+            "Weight Used",
+            "Rest Between Sets",
+            "RPE",
+            "Failure Reached",
+            "Hold Duration",
+            "Discomfort Level",
+            "Duration",
+            "Intensity",
+            "Distance",
+            "Speed"
+        };
+
         public ExerciseModal(int dayNumber, string section)
         {
             InitializeComponent();
@@ -39,6 +55,7 @@ namespace FitLab.Components
             PopulateFilters();
             RefreshExerciseList();
             PopulateCreateTabDropdowns();
+            PopulateTrackingMetricCheckboxes();
         }
 
         private void PopulateFilters()
@@ -141,6 +158,21 @@ namespace FitLab.Components
                 .ToList();
         }
 
+        private void PopulateTrackingMetricCheckboxes()
+        {
+            TrackingMetricsPanel.Children.Clear();
+
+            foreach (var metric in ValidTrackingMetrics)
+            {
+                var cb = new CheckBox
+                {
+                    Content = metric,
+                    Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#9a42ff")),
+                    Margin = new Thickness(5)
+                };
+                TrackingMetricsPanel.Children.Add(cb);
+            }
+        }
 
         private void CreateExercise_Click(object sender, RoutedEventArgs e)
         {
@@ -157,6 +189,19 @@ namespace FitLab.Components
                 return;
             }
 
+            var selectedMetrics = TrackingMetricsPanel.Children
+                .OfType<CheckBox>()
+                .Where(cb => cb.IsChecked == true)
+                .Select(cb => cb.Content?.ToString())
+                .Where(m => !string.IsNullOrWhiteSpace(m))
+                .ToList();
+
+            if (selectedMetrics.Count == 0)
+            {
+                MessageBox.Show("Please select at least one tracking metric.");
+                return;
+            }
+
             var newExercise = new Exercise
             {
                 Name = name,
@@ -166,17 +211,20 @@ namespace FitLab.Components
                 Description = description,
                 Equipment = string.IsNullOrWhiteSpace(equipmentText)
                     ? new List<string>()
-                    : equipmentText.Split(',').Select(e => e.Trim()).ToList()
+                    : equipmentText.Split(',').Select(e => e.Trim()).ToList(),
+                TrackingMetrics = selectedMetrics
+                    .Where(m => !string.IsNullOrWhiteSpace(m))
+                    .Select(m => m!)
+                    .ToList()
             };
 
+
             GlobalCache.AllExercises.Add(newExercise);
-            new LocalDatabaseService().SaveExercise(newExercise);
+            LocalDatabaseService.SaveExercise(newExercise);
 
             SelectedExercise = newExercise;
 
-            // Reuse add logic
             AddSelected_Click(sender, e);
         }
-
     }
 }

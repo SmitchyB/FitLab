@@ -107,32 +107,20 @@ namespace FitLab.Data
     public class CompletedExercise
     {
         public Guid ExerciseId { get; set; }
-        public List<DateTime> CompletionTimes { get; set; } = new();
 
-        // Required for casting to derived type manually after loading from LiteDB
-        public string SubType { get; set; } = string.Empty;
+        // Each completed attempt of the exercise
+        public List<CompletedExerciseEntry> Entries { get; set; } = new();
+
+        public string SubType { get; set; } = string.Empty; // Strength/Cardio/Flex/etc (optional label)
     }
 
-
-    public class CompletedStrengthExercise : CompletedExercise
+    public class CompletedExerciseEntry
     {
-        public List<int> Sets { get; set; } = new(); // Optional count, or could be tracked through RepsPerSet count
-        public List<int> RepsPerSet { get; set; } = new();
-        public List<double> WeightUsed { get; set; } = new();
-        public List<TimeSpan> RestBetweenSets { get; set; } = new();
+        public DateTime DateCompleted { get; set; }
+
+        // Metric label (e.g., "Sets", "Weight Used") -> user-entered value
+        public Dictionary<string, string> Metrics { get; set; } = new();
     }
 
-    public class CompletedCardioExercise : CompletedExercise
-    {
-        public List<TimeSpan> Durations { get; set; } = new();
-        public List<double> Distances { get; set; } = new();
-        public List<int> AvgHeartRates { get; set; } = new(); // Optional
-    }
-
-    public class CompletedFlexibilityExercise : CompletedExercise
-    {
-        public List<TimeSpan> HoldDurations { get; set; } = new();
-        public List<string> Notes { get; set; } = new(); // e.g., pain level, difficulty, range
-    }
 
 }
