@@ -22,25 +22,23 @@ namespace FitLab.Pages
         private string _currentWeightUnit = "Lbs"; // Current weight unit, defaulting to pounds
         private Goal? _editingGoal = null;// currently editing goal
         private readonly List<Goal> _goals = new(); // local copy of goals
-        private ObservableCollection<Dish> _currentEditingDishes = new();
-        private Meal? _mealBeingEdited = null;
-        private readonly string _uploadsFolder = @"A:\DotNetApps\FitLab\FitLab\Uploads";
-        private WeeklyProgress? _currentWeekProgress = null;
-        private int _currentPictureWeek = 0;
-        private int _currentMeasurementWeek = 0;
-        private string _currentMeasurementUnit = "Inches";
-
+        private ObservableCollection<Dish> _currentEditingDishes = new(); // Collection of dishes currently being edited for a meal
+        private Meal? _mealBeingEdited = null; // Meal currently being edited, if any
+        private readonly string _uploadsFolder = @"A:\DotNetApps\FitLab\FitLab\Uploads"; // Path to the uploads folder where images are stored
+        private WeeklyProgress? _currentWeekProgress = null; // Current weekly progress being displayed, if any
+        private int _currentPictureWeek = 0; // Current week number for progress pictures, starting from 0
+        private int _currentMeasurementWeek = 0; // Current week number for body measurements, starting from 0
+        private string _currentMeasurementUnit = "Inches"; // Current measurement unit, defaulting to inches
+        private int _selectedDayNumber; // The currently selected day number for water intake tracking, starting from 1
+        private int _todayAbsDay => SessionState.CurrentAbsoluteDay; // The absolute day number for today, calculated based on the session state
         public MyBodyPage()
         {
             InitializeComponent(); // Initialize the page components
             CmbWeightUnit.SelectionChanged += CmbWeightUnit_SelectionChanged; // Event handler for weight unit selection change
             CmbMeasurementUnit.SelectionChanged += CmbMeasurementUnit_SelectionChanged;
-            // Load user from DB
             _user = _db.LoadFirstUser() ?? new User(); // Load the first user from the database or create a new user if none exists
-            _currentWeightWeek = FitLab.AppState.SessionState.CurrentWeek; //Week 3 update: Set the current weight week based on the session state week # calculated on start of app
-            _currentMeasurementWeek = FitLab.AppState.SessionState.CurrentWeek;
-
-            // Populate fields
+            _currentWeightWeek = FitLab.AppState.SessionState.CurrentWeek; //Set the current weight week based on the session state week # calculated on start of app
+            _currentMeasurementWeek = FitLab.AppState.SessionState.CurrentWeek; // Set the current measurement week based on the session state week # calculated on start of app
             TxtName.Text = _user.Name; // User's name
             DatePickerDOB.SelectedDate = _user.DateOfBirth; // User's date of birth
             // Gender
@@ -52,13 +50,11 @@ namespace FitLab.Pages
                     break; // Exit loop once found
                 }
             }
-
             if (_user.Gender.Contains("Trans-Feminine") || _user.Gender.Contains("Trans-Masculine")) // Check if the user's gender contains Trans-Feminine or Trans-Masculine
             {
                 ChkOnHormones.Visibility = Visibility.Visible; // Show the hormone checkbox
                 ChkOnHormones.IsChecked = _user.Gender.Contains("On Hormones"); // Set the checkbox state based on the users homrone status
             }
-
             // Height display in Feet/Inches by default
             CmbHeightUnit.SelectedIndex = 2; // Set the height unit to Feet/Inches by default
             UpdateHeightDisplay(_user.HeightInches); // Update the height display based on the user's height in inches
@@ -66,15 +62,15 @@ namespace FitLab.Pages
             UpdateWeightDisplay(); // Update the weight display based on the current weight week and unit
             _goals = new List<Goal>(_user.Goals); // Load goals from the user data
             RefreshGoalsList(); // Refresh the goals list to display current goals
-            DatePickerSelectedDate.SelectedDate = DateTime.Today; // Set the selected date for water intake to today
-            LoadWaterIntakeForDate(DateTime.Today); // Load water intake for today
+            _selectedDayNumber = _todayAbsDay; // Set the selected day number to today's absolute day number
+            EnsureTodayWaterEntry(); // Ensure there is a water intake entry for today
+            RefreshWaterUI(); // Refresh the water intake UI to display today's water intake
             DatePickerFoodDate.SelectedDate = DateTime.Today; // Set the selected date for food intake to today
             LoadMealsForDate(DateTime.Today); // Load meals for today
             LoadBeforePictures(); // Load before pictures for the user
             LoadCurrentPictureWeek(); // Load the current picture week to display progress pictures
-            _user.BodyMeasurements ??= new List<WeeklyBodyMeasurement>();
-            UpdateMeasurementDisplay();
-
+            _user.BodyMeasurements ??= new List<WeeklyBodyMeasurement>(); // Ensure the user's body measurements list is initialized
+            UpdateMeasurementDisplay(); // Update the measurement display based on the current measurement week and unit
         }
         // This method updates the height display based on the selected unit and the user's height in inches.
         private void UpdateHeightDisplay(double heightInches)
@@ -225,97 +221,74 @@ namespace FitLab.Pages
         // This method updates the weight display based on the current weight week and unit.
         private void UpdateWeightDisplay()
         {
-            TxtCurrentWeek.Text = $"Week {_currentWeightWeek}"; // Display the current weight week
-
-            var startingWeightEntry = _user.WeightHistory.Count > 0 ? _user.WeightHistory[0] : null; // Get the starting weight entry, if it exists
-
-            if (startingWeightEntry != null) // If a starting weight entry exists
+            TxtCurrentWeek.Text = $"Week {_currentWeightWeek}"; // Update the current week label to show the current weight week
+            var startingWeightEntry = _user.WeightHistory // Get the earliest weight entry from the user's weight history
+                .OrderBy(w => w.Date) // Order the weight history by date
+                .FirstOrDefault(); // Order the weight history by date and take the first entry
+            if (startingWeightEntry != null) // If there is a starting weight entry recorded
             {
-                double value = _currentWeightUnit == "Kilograms" // Check if the current weight unit is Kilograms
+                double startVal = _currentWeightUnit == "Kilograms" // If the current weight unit is Kilograms
                     ? Components.Conversions.LbsToKg(startingWeightEntry.WeightLbs) // Convert pounds to kilograms
-                    : startingWeightEntry.WeightLbs; // Use pounds directly if the unit is not Kilograms
-
-                TxtStartingWeight.Text = $"Starting Weight: {Math.Round(value, 1)} {_currentWeightUnit}"; // Display the starting weight rounded to 1 decimal place with the current unit
+                    : startingWeightEntry.WeightLbs; // Otherwise, use the weight in pounds directly
+                TxtStartingWeight.Text = $"Starting Weight: {Math.Round(startVal, 1)} {_currentWeightUnit}"; // Display the starting weight rounded to 1 decimal place with the current weight unit
             }
-            else // If no starting weight entry exists
+            else // If there is no starting weight entry recorded
             {
                 TxtStartingWeight.Text = "Starting Weight: Not Recorded"; // Display a message indicating that the starting weight is not recorded
             }
-
-            WeightEntry? weekEntry = null; // Initialize the week entry to null
-
-            if (_currentWeightWeek < _user.WeightHistory.Count) // If the current weight week is within the range of recorded weeks
+            var weekDate = GetDateForWeek(_currentWeightWeek); // Get the date for the current weight week based on the user's created date
+            var weekEntry = _user.WeightHistory.FirstOrDefault(w => w.Date.Date == weekDate.Date); // Find the weight entry for the current week based on the date
+            bool editable = (_currentWeightWeek == SessionState.CurrentWeek) && weekEntry == null; // Check if the current week is editable (i.e., it is the current week and no weight entry exists for it)
+            if (weekEntry != null) // If there is a weight entry for the current week
             {
-                weekEntry = _user.WeightHistory[_currentWeightWeek]; // Get the weight entry for the current week
-            }
-
-            if (weekEntry != null) // If a weight entry for the current week exists
-            {
-                TxtWeeklyWeight.IsReadOnly = !IsCurrentWeekEditable(weekEntry); // Set the read-only state of the weekly weight input based on whether the current week is editable
-
-                double value = _currentWeightUnit == "Kilograms" // Check if the current weight unit is Kilograms
+                double val = _currentWeightUnit == "Kilograms" // If the current weight unit is Kilograms
                     ? Components.Conversions.LbsToKg(weekEntry.WeightLbs) // Convert pounds to kilograms
-                    : weekEntry.WeightLbs; // Use pounds directly if the unit is not Kilograms
-
-                TxtWeeklyWeight.Text = Math.Round(value, 1).ToString(); // Display the weekly weight rounded to 1 decimal place
+                    : weekEntry.WeightLbs; // Otherwise, use the weight in pounds directly
+                TxtWeeklyWeight.Text = Math.Round(val, 1).ToString(); // Display the weekly weight rounded to 1 decimal place
+                TxtWeeklyWeight.IsReadOnly = true; // Make the weekly weight input read-only
+                BtnWeightSave.Visibility = Visibility.Collapsed; // Hide the Save button since the weight for this week is already recorded
             }
-            else // If no weight entry exists for the current week
+            else // If there is no weight entry for the current week
             {
-                TxtWeeklyWeight.IsReadOnly = !IsCurrentWeekEditable(null); // Set the read-only state of the weekly weight input based on whether the current week is editable
-                TxtWeeklyWeight.Text = ""; // Clear the weekly weight input if no entry exists for the current week 
-            }
-
-            if (weekEntry == null && !TxtWeeklyWeight.IsReadOnly) // If no weight entry exists for the current week and the input is not read-only
-            {
-                BtnWeightSave.Visibility = Visibility.Visible; // Show the Save button to allow saving a new weight entry
-            }
-            else // If a weight entry exists for the current week or the input is read-only
-            {
-                BtnWeightSave.Visibility = Visibility.Collapsed; // Hide the Save button
+                TxtWeeklyWeight.Text = ""; // Clear the weekly weight input
+                TxtWeeklyWeight.IsReadOnly = !editable; // Make the weekly weight input read-only if the week is not editable
+                BtnWeightSave.Visibility = editable ? Visibility.Visible : Visibility.Collapsed; // Show the Save button only if the week is editable
             }
         }
-        // This method checks if the current week is editable based on the user's weight entry.
-        private bool IsCurrentWeekEditable(FitLab.Data.WeightEntry? entry)
+        // This method retrieves the start date of the week based on the user's created date and local time zone.
+        private DateTime GetWeekStartLocal()
         {
-            var currentWeek = SessionState.CurrentWeek;//Week 3 update: Get the current week number from the session state
-
-
-            if (_currentWeightWeek == 0) // If the current week is week 0
-            {
-                return entry == null; // Week 0 is editable only if no entry exists
-            }
-            return _currentWeightWeek == currentWeek && entry == null; // For all other weeks, they are editable only if the current week matches and no entry exists
+            var created = _user.CreatedOn; // Get the user's created date
+            if (created.Kind == DateTimeKind.Utc) return TimeZoneInfo.ConvertTimeFromUtc(created, TimeZoneInfo.Local).Date; // If the created date is in UTC, convert it to local time and return the date
+            if (created.Kind == DateTimeKind.Unspecified) return DateTime.SpecifyKind(created, DateTimeKind.Local).Date; // If the created date is unspecified, treat it as local time and return the date
+            return created.Date;
         }
+        private DateTime GetDateForWeek(int weekIndex) => GetWeekStartLocal().AddDays(weekIndex * 7); // calculates the start date of the specified week index based on the user's creation date
         // Event handler for the Save button click to save the weekly weight entry.
-        private void BtnWeightSave_Click(object sender, RoutedEventArgs e)
+        private void BtnWeightSave_Click(object sender, RoutedEventArgs e) // Event handler for clicking the Save button for weekly weight entry
         {
-            if (!double.TryParse(TxtWeeklyWeight.Text.Trim(), out double entered)) //Try to parse the entered weight from the input field
+            if (!double.TryParse(TxtWeeklyWeight.Text.Trim(), out double entered)) // Try to parse the entered text as a double after trimming spaces; if it fails, entered will be 0
             {
                 MessageBox.Show("Enter a valid number."); // Show an error message if the input is not a valid number
-                return; // Exit the method if the input is invalid
+                return; // Exit the method early since the input is invalid
             }
-
-            double weightLbs = _currentWeightUnit == "Kilograms" // Check if the current weight unit is Kilograms
-                ? Components.Conversions.KgToLbs(entered) // Convert kilograms to pounds
-                : entered; // Use the entered value directly if the unit is not Kilograms
-
-            if (_currentWeightWeek < _user.WeightHistory.Count) //If the current weight week is within the range of recorded weeks
+            double weightLbs = _currentWeightUnit == "Kilograms" // Check if the currently selected unit is Kilograms
+                ? Components.Conversions.KgToLbs(entered) // If so, convert the entered value from kilograms to pounds
+                : entered; // Otherwise, keep the entered value as pounds
+            var weekDate = GetDateForWeek(_currentWeightWeek); // Get the start date of the week for the current week index
+            if (_user.WeightHistory.Any(w => w.Date.Date == weekDate.Date)) // Check if there is already a weight entry for that week date
             {
-                // Should not happen because I lock editing if it exists, but safeguard it anyway
-                MessageBox.Show("This week's weight is already recorded."); // Show an error message if the weight for the current week is already recorded
-                return; // Exit the method if the weight is already recorded
+                MessageBox.Show("This week's weight is already recorded."); // Show an error message if an entry already exists for this week
+                return; // Exit the method to avoid duplicates
             }
-
             _user.WeightHistory.Add(new WeightEntry // Add a new weight entry to the user's weight history
             {
-                Date = _user.CreatedOn.Date.AddDays(_currentWeightWeek * 7), // Set the date of the entry based on the user's creation date and the current week
-                WeightLbs = weightLbs // Set the weight in pounds
+                Date = weekDate, // Set the date to the calculated week date
+                WeightLbs = weightLbs // Set the recorded weight in pounds
             });
-
-            _db.SaveUser(_user); // Save the updated user data to the database
-
-            BtnWeightSave.Visibility = Visibility.Collapsed; // Hide the Save button after saving the weight entry
-            UpdateWeightDisplay(); // Update the weight display to reflect the newly saved entry
+            _db.SaveUser(_user); // Save the updated user data (including the new weight) to the database
+            BtnWeightSave.Visibility = Visibility.Collapsed; // Hide the Save button since the weight for this week is now recorded
+            UpdateWeightDisplay(); // Refresh the weight display to show the newly saved value
         }
         // Refreshes the goals list displayed in the UI.
         private void RefreshGoalsList()
@@ -425,60 +398,83 @@ namespace FitLab.Pages
             _user.Goals = _goals; // Update the user's goals with the local goals list
             _db.SaveUser(_user); // Save the updated user data to the database
         }
-        // Event handler for the Date picker back button
-        private void BtnDateBack_Click(object sender, RoutedEventArgs e)
+        // Ensures today's water intake entry exists; if not, creates it with zero cups
+        private void EnsureTodayWaterEntry() // Ensures there is a water intake entry for today's date
         {
-            if (DatePickerSelectedDate.SelectedDate.HasValue) // Check if a date is selected in the date picker
-                DatePickerSelectedDate.SelectedDate = DatePickerSelectedDate.SelectedDate.Value.AddDays(-1); // Move the selected date back by one day
-        }
-        //Event handler for the Date picker forward button
-        private void BtnDateForward_Click(object sender, RoutedEventArgs e)
-        {
-            if (DatePickerSelectedDate.SelectedDate.HasValue) // Check if a date is selected in the date picker
-                DatePickerSelectedDate.SelectedDate = DatePickerSelectedDate.SelectedDate.Value.AddDays(1); // Move the selected date forward by one day
-        }
-        // Event handler for the Date picker selection change
-        private void DatePickerSelectedDate_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
-        {
-            LoadWaterIntakeForDate(DatePickerSelectedDate.SelectedDate ?? DateTime.Today); // Load the water intake for the selected date or default to today if no date is selected
-        }
-        // This method loads the water intake for a specific date and updates the UI accordingly.
-        private void LoadWaterIntakeForDate(DateTime date)
-        {
-            var entry = _user.WaterIntake.FirstOrDefault(w => w.Date.Date == date.Date); // Find the water intake entry for the selected date
-            int cups = entry?.Cups ?? 0; // Get the number of cups consumed on that date, defaulting to 0 if no entry exists
-            TxtWaterCups.Text = $"{cups} Cup(s)"; // Update the water cups text with the number of cups consumed on that date
-        }
-        // Event handler for increasing the water cups count
-        private void BtnIncreaseCups_Click(object sender, RoutedEventArgs e)
-        {
-            AdjustCups(1); // Call the AdjustCups method with a delta of 1 to increase the cups count
-        }
-        // Event handler for decreasing the water cups count
-        private void BtnDecreaseCups_Click(object sender, RoutedEventArgs e)
-        {
-            AdjustCups(-1); // Call the AdjustCups method with a delta of -1 to decrease the cups count
-        }
-        // This method adjusts the water cups count for the selected date by a specified delta (positive or negative).
-        private void AdjustCups(int delta)
-        {
-            var date = DatePickerSelectedDate.SelectedDate ?? DateTime.Today; // Get the selected date from the date picker or default to today if no date is selected
-            var entry = _user.WaterIntake.FirstOrDefault(w => w.Date.Date == date.Date); // Find the water intake entry for the selected date
-
-            if (entry == null) // If no entry exists for the selected date
+            var today = DateTime.Today; // Get today's date (no time component)
+            if (!_user.WaterIntake.Any(w => w.Date.Date == today)) // Check if today's date already exists in the user's water intake list
             {
-                entry = new DailyWaterIntake // Create a new DailyWaterIntake entry for the selected date
-                {
-                    Date = date.Date, // Set the date to the selected date
-                    Cups = 0 // Initialize the cups count to 0
-                };
-                _user.WaterIntake.Add(entry); // Add the new entry to the user's water intake list
+                _user.WaterIntake.Add(new DailyWaterIntake { Date = today, Cups = 0 }); // If not, add a new water intake entry with 0 cups
+                _db.SaveUser(_user); // Save the updated user data to the database
             }
-
-            entry.Cups = Math.Max(0, entry.Cups + delta); // Update the cups count by adding the delta, ensuring it does not go below 0
-            TxtWaterCups.Text = $"{entry.Cups} Cup(s)"; // Update the water cups text with the new cups count
-            _db.SaveUser(_user); // Save the updated user data to the database
         }
+        // Gets the exact date for a given absolute day number since account creation, normalized to local time
+        private DateTime GetDateForDayNumber(int dayNumber) // Gets the exact date for a given absolute day number since account creation
+        {
+            var created = _user.CreatedOn; // Retrieve the user's account creation date
+            // Normalize to local date regardless of how CreatedOn was stored
+            DateTime startLocal; // Variable to hold the normalized local start date
+            if (created.Kind == DateTimeKind.Utc) // If stored in UTC
+            {
+                startLocal = TimeZoneInfo.ConvertTimeFromUtc(created, TimeZoneInfo.Local); // Convert to local time
+            }
+            else if (created.Kind == DateTimeKind.Local) // If already local time
+            {
+                startLocal = created; // Use as is
+            }
+            else // Unspecified -> assume it was saved as local wall time
+            {
+                startLocal = DateTime.SpecifyKind(created, DateTimeKind.Local); // Treat it as local
+            }
+            return startLocal.Date.AddDays(dayNumber - 1); // Return the date by adding (dayNumber - 1) days from the start date
+        }
+        // Updates the water tracking UI for the currently selected day
+        private void RefreshWaterUI() // Updates the water intake section of the UI for the selected day
+        {
+            TxtDayLabel.Text = $"Day {_selectedDayNumber}"; // Show the currently selected absolute day number
+            var date = GetDateForDayNumber(_selectedDayNumber); // Get the actual date for the selected day number
+            var entry = _user.WaterIntake.FirstOrDefault(w => w.Date.Date == date.Date); // Find water intake entry for that date
+            TxtWaterCups.Text = $"{(entry?.Cups ?? 0)} Cup(s)"; // Display cups consumed (or 0 if no entry exists)
+            bool isToday = _selectedDayNumber == _todayAbsDay; // Check if the selected day is today
+            BtnWaterInc.IsEnabled = isToday; // Enable increment button only if it’s today
+            BtnWaterDec.IsEnabled = isToday; // Enable decrement button only if it’s today
+            TxtEditHint.Text = isToday ? "" : "Read-only (not today)"; // Show hint if editing a past day
+        }
+        // Adjusts water cup count for today by the given delta (positive or negative)
+        private void AdjustWaterCups(int delta) // Adjusts the number of cups for the selected day by a delta (positive or negative)
+        {
+            if (_selectedDayNumber != _todayAbsDay) return; // Exit if the selected day is not today
+            var date = GetDateForDayNumber(_selectedDayNumber); // Get date for the selected day
+            var entry = _user.WaterIntake.FirstOrDefault(w => w.Date.Date == date.Date); // Find water intake entry for that date
+            if (entry == null) // If no entry exists
+            {
+                entry = new DailyWaterIntake { Date = date, Cups = 0 }; // Create a new entry starting at 0 cups
+                _user.WaterIntake.Add(entry); // Add it to the user's list
+            }
+            entry.Cups = Math.Max(0, entry.Cups + delta); // Adjust cups and ensure it never goes below 0
+            _db.SaveUser(_user); // Save updated user data to the database
+            RefreshWaterUI(); // Refresh the UI to reflect changes
+        }
+        // Moves to the previous day in the water tracking view if not already at day 1
+        private void BtnDayBack_Click(object sender, RoutedEventArgs e) // Event handler for the "Previous Day" button
+        {
+            if (_selectedDayNumber > 1) // Ensure we don't go before day 1
+            {
+                _selectedDayNumber--; // Move one day backward
+                RefreshWaterUI(); // Refresh UI for the new selected day
+            }
+        }
+        // Moves to the next day in the water tracking view if not already at today
+        private void BtnDayForward_Click(object sender, RoutedEventArgs e) // Event handler for the "Next Day" button
+        {
+            if (_selectedDayNumber < _todayAbsDay) // Ensure we don't go beyond today
+            {
+                _selectedDayNumber++; // Move one day forward
+                RefreshWaterUI(); // Refresh UI for the new selected day
+            }
+        }
+        private void BtnWaterInc_Click(object sender, RoutedEventArgs e) => AdjustWaterCups(1); // Increment cups by 1 when plus button is clicked
+        private void BtnWaterDec_Click(object sender, RoutedEventArgs e) => AdjustWaterCups(-1); // Decrement cups by 1 when minus button is clicked
         // Event handler for navigating backwards through food intake dates
         private void BtnFoodDateBack_Click(object sender, RoutedEventArgs e)
         {
@@ -835,32 +831,27 @@ namespace FitLab.Pages
                 LoadCurrentPictureWeek(); // Load the current picture week to update the UI with the newly uploaded picture
             }
         }
-
+        // Updates the measurement UI for the current measurement week
         private void UpdateMeasurementDisplay()
         {
-            Debug.WriteLine($"UpdateMeasurementDisplay called. _user is null? {_user == null}");
-
-            TxtMeasurementWeek.Text = $"Week {_currentMeasurementWeek}";
-            if (_user == null)
+            TxtMeasurementWeek.Text = $"Week {_currentMeasurementWeek}"; // Update week label to current measurement week
+            if (_user == null) // If user data is missing
             {
-                Debug.WriteLine("UpdateMeasurementDisplay aborted — _user is null");
-                return;
+                return; // Exit method
             }
-            var date = _user.CreatedOn.Date.AddDays(_currentMeasurementWeek * 7);
-
-            var entry = _user.BodyMeasurements.FirstOrDefault(x => x.Date.Date == date);
-            bool editable = _currentMeasurementWeek == SessionState.CurrentWeek && entry == null;
-
-            void SetField(TextBox box, double? val)
+            var date = _user.CreatedOn.Date.AddDays(_currentMeasurementWeek * 7); // Calculate date for current measurement week
+            var entry = _user.BodyMeasurements.FirstOrDefault(x => x.Date.Date == date); // Find measurement entry for that date
+            bool editable = _currentMeasurementWeek == SessionState.CurrentWeek && entry == null; // Editable only if current week and no entry yet
+            void SetField(TextBox box, double? val) // Local function to set a measurement field's text and readonly state
             {
-                box.IsReadOnly = !editable;
-                box.Text = val.HasValue
-                    ? (_currentMeasurementUnit == "Centimeters"
-                        ? Math.Round(Conversions.InchesToCm(val.Value), 1).ToString()
-                        : Math.Round(val.Value, 1).ToString())
-                    : "";
+                box.IsReadOnly = !editable; // Lock field if not editable
+                box.Text = val.HasValue // If value exists
+                    ? (_currentMeasurementUnit == "Centimeters" // If in cm mode
+                        ? Math.Round(Conversions.InchesToCm(val.Value), 1).ToString() // Convert from inches to cm
+                        : Math.Round(val.Value, 1).ToString()) // Otherwise keep inches
+                    : ""; // If no value, clear field
             }
-
+            // Set each field from the entry values
             SetField(TxtChest, entry?.Chest);
             SetField(TxtWaist, entry?.Waist);
             SetField(TxtHips, entry?.Hips);
@@ -872,27 +863,24 @@ namespace FitLab.Pages
             SetField(TxtThigh, entry?.Thigh);
             SetField(TxtCalf, entry?.Calf);
             SetField(TxtAnkle, entry?.Ankle);
-
-            BtnMeasurementSave.Visibility = editable ? Visibility.Visible : Visibility.Collapsed;
+            BtnMeasurementSave.Visibility = editable ? Visibility.Visible : Visibility.Collapsed; // Show save button only if editable
         }
+        // Saves a new body measurement entry for the current week
         private void BtnMeasurementSave_Click(object sender, RoutedEventArgs e)
         {
-            if (_currentMeasurementWeek != SessionState.CurrentWeek)
+            if (_currentMeasurementWeek != SessionState.CurrentWeek) // Only allow saving for current week
             {
-                MessageBox.Show("You can only submit for the current week.");
-                return;
+                MessageBox.Show("You can only submit for the current week."); // Show error message
+                return; // Exit method
             }
-
-            DateTime date = _user.CreatedOn.Date.AddDays(_currentMeasurementWeek * 7);
-
-            double? ParseBox(TextBox box)
+            DateTime date = _user.CreatedOn.Date.AddDays(_currentMeasurementWeek * 7); // Calculate date for current measurement week
+            double? ParseBox(TextBox box) // Local function to parse a field into inches (or cm converted to inches)
             {
-                return double.TryParse(box.Text.Trim(), out double val)
-                    ? (_currentMeasurementUnit == "Centimeters" ? Conversions.CmToInches(val) : val)
-                    : null;
+                return double.TryParse(box.Text.Trim(), out double val) // Try parsing input
+                    ? (_currentMeasurementUnit == "Centimeters" ? Conversions.CmToInches(val) : val) // Convert to inches if needed
+                    : null; // Return null if invalid
             }
-
-            var newEntry = new WeeklyBodyMeasurement
+            var newEntry = new WeeklyBodyMeasurement // Create new measurement entry
             {
                 Date = date,
                 Chest = ParseBox(TxtChest),
@@ -907,44 +895,39 @@ namespace FitLab.Pages
                 Calf = ParseBox(TxtCalf),
                 Ankle = ParseBox(TxtAnkle)
             };
-
-            _user.BodyMeasurements.Add(newEntry);
-            _db.SaveUser(_user);
-            UpdateMeasurementDisplay();
+            _user.BodyMeasurements.Add(newEntry); // Add to user's measurement list
+            _db.SaveUser(_user); // Save changes to database
+            UpdateMeasurementDisplay(); // Refresh UI
         }
-
-
+        // Moves to the previous measurement week if possible
         private void BtnMeasurementWeekBack_Click(object sender, RoutedEventArgs e)
         {
-            if (_currentMeasurementWeek > 0)
-                _currentMeasurementWeek--;
-
-            UpdateMeasurementDisplay();
+            if (_currentMeasurementWeek > 0) // Only move back if above week 0
+                _currentMeasurementWeek--; // Go back one week
+            UpdateMeasurementDisplay(); // Refresh UI
         }
-
+        // Moves to the next measurement week
         private void BtnMeasurementWeekForward_Click(object sender, RoutedEventArgs e)
         {
-            _currentMeasurementWeek++;
-            UpdateMeasurementDisplay();
+            _currentMeasurementWeek++; // Go forward one week
+            UpdateMeasurementDisplay(); // Refresh UI
         }
+        // Shows advanced measurements panel when checkbox is checked
         private void ChkAdvancedMeasurements_Checked(object sender, RoutedEventArgs e)
         {
-            PanelAdvancedMeasurements.Visibility = Visibility.Visible;
+            PanelAdvancedMeasurements.Visibility = Visibility.Visible; // Show advanced panel
         }
-
+        // Hides advanced measurements panel when checkbox is unchecked
         private void ChkAdvancedMeasurements_Unchecked(object sender, RoutedEventArgs e)
         {
-            PanelAdvancedMeasurements.Visibility = Visibility.Collapsed;
+            PanelAdvancedMeasurements.Visibility = Visibility.Collapsed; // Hide advanced panel
         }
-
+        // Handles measurement unit change between Inches and Centimeters
         private void CmbMeasurementUnit_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (CmbMeasurementUnit.SelectedItem is ComboBoxItem selected)
-                _currentMeasurementUnit = selected.Content?.ToString() ?? "Inches";
-
-            UpdateMeasurementDisplay();
+            if (CmbMeasurementUnit.SelectedItem is ComboBoxItem selected) // If a unit is selected
+                _currentMeasurementUnit = selected.Content?.ToString() ?? "Inches"; // Update current unit
+            UpdateMeasurementDisplay(); // Refresh UI to reflect unit change
         }
-
-
     }
 }

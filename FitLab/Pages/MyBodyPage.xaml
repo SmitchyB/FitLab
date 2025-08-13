@@ -196,18 +196,38 @@
             <!-- Daily Water Intake-->
             <Border BorderBrush="#9a42ff" BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,0,10">
                 <StackPanel>
-                    <TextBlock Text="Daily Water Intake" FontSize="16" FontWeight="Bold" Margin="0,0,0,10" Foreground="#9a42ff"/>
-                    <!-- Date Selection -->
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                        <Button Content="◀" Width="30" Click="BtnDateBack_Click"/>
-                        <DatePicker x:Name="DatePickerSelectedDate" SelectedDateChanged="DatePickerSelectedDate_SelectedDateChanged" Width="150" Margin="5,0"/>
-                        <Button Content="▶" Width="30" Click="BtnDateForward_Click"/>
+                    <TextBlock Text="Daily Water Intake" FontSize="18" FontWeight="Bold" Foreground="#9a42ff" Margin="0,0,0,8"/>
+
+                    <!-- Day navigator (replaces DatePicker) -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,10">
+                        <Button x:Name="BtnDayBack" Content="◀" Width="32" Height="28" Click="BtnDayBack_Click"/>
+                        <TextBlock x:Name="TxtDayLabel"
+                                   Text="Day 1"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Foreground="LightGray"
+                                   Margin="8,0"
+                                   VerticalAlignment="Center"/>
+                        <Button x:Name="BtnDayForward" Content="▶" Width="32" Height="28" Click="BtnDayForward_Click"/>
+                        <TextBlock x:Name="TxtEditHint"
+                                   Text=""
+                                   FontSize="12"
+                                   Foreground="LightGray"
+                                   Margin="12,0,0,0"
+                                   VerticalAlignment="Center"/>
                     </StackPanel>
+
                     <!-- Cup Counter -->
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Content="-" Width="30" Click="BtnDecreaseCups_Click"/>
-                        <TextBlock x:Name="TxtWaterCups" Text="0 Cup(s)" FontSize="14" VerticalAlignment="Center" Margin="10,0" Foreground="#9a42ff"/>
-                        <Button Content="+" Width="30" Click="BtnIncreaseCups_Click"/>
+                        <Button x:Name="BtnWaterDec" Content="-" Width="30" Click="BtnWaterDec_Click"/>
+                        <TextBlock x:Name="TxtWaterCups"
+                                   Text="0 Cup(s)"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   VerticalAlignment="Center"
+                                   Margin="10,0"
+                                   Foreground="#9a42ff"/>
+                        <Button x:Name="BtnWaterInc" Content="+" Width="30" Click="BtnWaterInc_Click"/>
                     </StackPanel>
                 </StackPanel>
             </Border>

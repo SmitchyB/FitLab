@@ -18,13 +18,12 @@ namespace FitLab
             var user = db.LoadFirstUser();
 
             GlobalCache.AllExercises = LocalDatabaseService.LoadExercises();
-            Debug.WriteLine($"[INIT] Preloaded {GlobalCache.AllExercises.Count} exercises.");
 
             if (user != null)
             {
                 SessionState.CurrentWeek = CalculateCurrentWeek.GetWeekNumber(user.CreatedOn, TimeZoneInfo.Local);
                 SessionState.CurrentWorkoutDay = CalculateCurrentDay.GetCurrentDayNumber(user.CreatedOn, user.WorkoutPlan.PlanLength);
-
+                SessionState.CurrentAbsoluteDay = CalculateCurrentDay.GetAbsoluteDayNumber(user.CreatedOn, TimeZoneInfo.Local);
                 Header.Visibility = Visibility.Visible;
                 MainFrame.Navigate(new Pages.HomePage());
             }

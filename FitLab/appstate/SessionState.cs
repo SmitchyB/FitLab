@@ -10,5 +10,7 @@ namespace FitLab.AppState
     {
         public static int CurrentWeek { get; set; }
         public static int CurrentWorkoutDay { get; set; }
+        public static int CurrentAbsoluteDay { get; set; }
+
     }
 }

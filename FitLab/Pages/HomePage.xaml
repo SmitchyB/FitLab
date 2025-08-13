@@ -5,45 +5,291 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:FitLab.Components"
       mc:Ignorable="d"
-      d:DesignHeight="450" d:DesignWidth="800"
+      d:DesignHeight="800" d:DesignWidth="1200"
       Title="HomePage"
       Background="#222">
 
     <Grid>
         <!-- Main Content Layer -->
         <ScrollViewer>
-            <StackPanel Margin="20">
+            <StackPanel Margin="20" Orientation="Vertical" VerticalAlignment="Top">
+                <!-- Header -->
+                <TextBlock x:Name="WelcomeText" FontSize="26" FontWeight="Bold" Foreground="White" />
 
-                <!-- Welcome & Week Info Section -->
-                <Border BorderBrush="#9a42ff" BorderThickness="2" CornerRadius="5" Background="#222" Padding="15" Margin="0,0,0,20">
-                    <StackPanel HorizontalAlignment="Center">
-                        <TextBlock x:Name="WelcomeText" FontSize="24" FontWeight="Bold" Foreground="White"/>
-                        <TextBlock x:Name="WeekText" FontSize="18" Margin="0,5,0,0" Foreground="White"/>
-                        <TextBlock x:Name="DayText" FontSize="18" Margin="0,2,0,0" Foreground="White"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- Quick Actions Section -->
+                <!-- Quick Actions -->
                 <TextBlock Text="Quick Actions" FontSize="22" FontWeight="Bold" Margin="0,0,0,10" Foreground="White"/>
 
-                <!-- Daily Workout Plan -->
-                <Border BorderBrush="#9a42ff" BorderThickness="2" CornerRadius="8" Padding="10" Margin="0,0,0,20">
-                    <StackPanel x:Name="ExerciseQuickList" Margin="0,10,0,0">
-                        <TextBlock Text="Today's Exercises" FontSize="18" FontWeight="Bold" Foreground="#9a42ff" Margin="0,0,0,10"/>
-                    </StackPanel>
-                </Border>
+                <!-- Daily Quick Actions -->
+                <Expander Header="Daily Quick Actions" IsExpanded="True">
+                    <StackPanel Margin="0,10,0,0">
+                        <!-- Today's Workout -->
+                        <Border BorderBrush="#9a42ff" BorderThickness="2" CornerRadius="8" Padding="10" Margin="0,0,0,20">
+                            <StackPanel>
+                                <TextBlock Text="Today's Exercises" FontSize="18" FontWeight="Bold" Foreground="#9a42ff" Margin="0,0,0,10"/>
+                                <StackPanel x:Name="ExerciseQuickList"/>
+                            </StackPanel>
+                        </Border>
 
+                        <!-- Daily Water Intake (Day# only, no date navigation) -->
+                        <Border BorderBrush="#9a42ff" BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="Daily Water Intake" FontSize="16" FontWeight="Bold" Margin="0,0,0,8" Foreground="#9a42ff"/>
+                                <TextBlock x:Name="TxtHomeWaterDayLabel"
+                                           FontSize="13"
+                                           Foreground="#9a42ff"
+                                           Margin="0,0,0,10"/>
+                                <!-- Cup Counter -->
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Button Content="-" Width="30" Click="BtnHomeWaterDecrease_Click"/>
+                                    <TextBlock x:Name="TxtHomeWaterCups"
+                                               Text="0 Cup(s)"
+                                               FontSize="16"
+                                               FontWeight="Bold"
+                                               VerticalAlignment="Center"
+                                               Margin="10,0"
+                                               Foreground="#9a42ff"/>
+                                    <Button Content="+" Width="30" Click="BtnHomeWaterIncrease_Click"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                        <!-- Daily Food Intake (Quick Add, today only) -->
+                        <Border BorderBrush="#9a42ff" BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="Daily Food Intake" FontSize="16" FontWeight="Bold" Margin="0,0,0,8" Foreground="#9a42ff"/>
+                                <TextBlock x:Name="TxtHomeFoodDayLabel" FontSize="13" Foreground="#9a42ff" Margin="0,0,0,10"/>
+
+                                <Button Content="Add Meal" Width="120" Height="35" Background="#9a42ff" Foreground="White"
+            Click="BtnHomeAddMeal_Click"/>
+
+                                <!-- Quick Add UI (today only, no list) -->
+                                <StackPanel x:Name="PanelAddMealHome" Visibility="Collapsed" Margin="0,10,0,0">
+                                    <!-- Meal Time -->
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10" HorizontalAlignment="Center">
+                                        <TextBlock Text="Meal Time:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="#9a42ff" FontWeight="Bold"/>
+                                        <ComboBox x:Name="CmbMealTimeHome" Width="200">
+                                            <ComboBoxItem Content="Breakfast"/>
+                                            <ComboBoxItem Content="Lunch"/>
+                                            <ComboBoxItem Content="Dinner"/>
+                                            <ComboBoxItem Content="Snack"/>
+                                        </ComboBox>
+                                    </StackPanel>
+
+                                    <!-- Dish inputs (same fields as MyBodyPage) -->
+                                    <Border BorderBrush="#9a42ff" BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,0,10">
+                                        <ItemsControl x:Name="PanelDishesHome">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel>
+                                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                                            <TextBlock Text="Dish Name:" Width="90" Foreground="#9a42ff"/>
+                                                            <TextBox Width="220" Text="{Binding DishName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                            <Button Content="-" Width="30" Margin="5,0,0,0" Click="BtnRemoveDishHome_Click"/>
+                                                        </StackPanel>
+                                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                                            <TextBlock Text="Portion:" Width="90" Foreground="#9a42ff"/>
+                                                            <TextBox Width="220" Text="{Binding PortionSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                        </StackPanel>
+                                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                                            <TextBlock Text="Ingredients:" Width="90" Foreground="#9a42ff"/>
+                                                            <TextBox Width="220" Text="{Binding Ingredients, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                        </StackPanel>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="Calories:" Width="90" Foreground="#9a42ff"/>
+                                                            <TextBox Width="220" Text="{Binding Calories, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Border>
+
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <Button Content="Add Dish" Width="120" Margin="0,0,0,10" Click="BtnAddDishHome_Click"/>
+                                        <Button Content="Save Meal" Width="140" Background="#9a42ff" Foreground="White" Click="BtnSaveMealHome_Click"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Weekly Quick Actions -->
+                <Expander Header="Weekly Quick Actions" IsExpanded="True" Margin="0,10,0,0">
+                    <StackPanel Margin="0,10,0,0">
+                        <!-- Weekly Weight -->
+                        <Border x:Name="BorderWeeklyWeightQuick"
+                            BorderBrush="#9a42ff"
+                            BorderThickness="1"
+                            CornerRadius="5"
+                            Padding="10"
+                            Margin="0,0,0,10"
+                            Visibility="Collapsed">
+                            <StackPanel>
+                                <TextBlock Text="Weekly Weight Update"
+                                    FontSize="16" FontWeight="Bold" Margin="0,0,0,8" Foreground="#9a42ff"/>
+                                <TextBlock x:Name="TxtWeeklyWeightWeekLabel"
+                                   FontSize="13" Foreground="#9a42ff" Margin="0,0,0,10"
+                                   Text="Current Week"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBox x:Name="TxtQuickWeeklyWeight"
+                                        Width="120" Height="32"
+                                        HorizontalContentAlignment="Right"
+                                        VerticalContentAlignment="Center"
+                                        Margin="0,0,8,0"
+                                        ToolTip="Enter weight"/>
+                                    <ComboBox x:Name="CmbQuickWeightUnit" Width="130" Height="32" SelectedIndex="0">
+                                        <ComboBoxItem Content="Lbs"/>
+                                        <ComboBoxItem Content="Kilograms"/>
+                                    </ComboBox>
+                                    <Button x:Name="BtnQuickWeightSave"
+                                        Content="Save"
+                                        Width="120" Height="35"
+                                        Background="#9a42ff" Foreground="White"
+                                        Margin="8,0,0,0"
+                                        Click="BtnQuickWeightSave_Click"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Body Measurement Tracking -->
+                        <Border x:Name="BorderWeeklyMeasurementsQuick"
+                            BorderBrush="#9a42ff"
+                            BorderThickness="1"
+                            CornerRadius="5"
+                            Padding="10"
+                            Margin="0,0,0,10"
+                            Visibility="Collapsed">         
+                            <StackPanel>
+                                <TextBlock Text="Weekly Body Measurements"
+                                    FontSize="16" FontWeight="Bold" Margin="0,0,0,8" Foreground="#9a42ff"/>
+                                <TextBlock x:Name="TxtWeeklyMeasWeekLabel"
+                                    FontSize="13" Foreground="#9a42ff" Margin="0,0,0,10"
+                                    Text="Current Week"/>
+
+                                <!-- Unit + Advanced toggle -->
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10" HorizontalAlignment="Center">
+                                    <TextBlock Text="Unit:" VerticalAlignment="Center" Margin="0,0,6,0" Foreground="#9a42ff" FontWeight="Bold"/>
+                                    <ComboBox x:Name="CmbMeasUnitHome" Width="150" Height="32" SelectedIndex="0" Margin="0,0,12,0">
+                                        <ComboBoxItem Content="Inches"/>
+                                        <ComboBoxItem Content="Centimeters"/>
+                                    </ComboBox>
+                                    <CheckBox x:Name="ChkAdvancedMeasHome"
+                                        Content="Advanced Measurement Tracking"
+                                        VerticalAlignment="Center"
+                                        Checked="ChkAdvancedMeasHome_Checked"
+                                        Unchecked="ChkAdvancedMeasHome_Unchecked"/>
+                                </StackPanel>
+
+                                <!-- Basic fields -->
+                                <StackPanel x:Name="PanelBasicMeasHome" Margin="0,0,0,10">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5" HorizontalAlignment="Center">
+                                        <TextBlock Text="Chest:" Width="120" Foreground="#9a42ff"/>
+                                        <TextBox x:Name="TxtChestHome" Width="160"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5" HorizontalAlignment="Center">
+                                        <TextBlock Text="Waist:" Width="120" Foreground="#9a42ff"/>
+                                        <TextBox x:Name="TxtWaistHome" Width="160"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Text="Hips:" Width="120" Foreground="#9a42ff"/>
+                                        <TextBox x:Name="TxtHipsHome" Width="160"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- Advanced fields (hidden until checked) -->
+                                <StackPanel x:Name="PanelAdvancedMeasHome" Visibility="Collapsed" Margin="0,0,0,10">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5" HorizontalAlignment="Center">
+                                        <TextBlock Text="Neck:" Width="120" Foreground="#9a42ff"/>
+                                        <TextBox x:Name="TxtNeckHome" Width="160"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5" HorizontalAlignment="Center">
+                                        <TextBlock Text="Shoulders:" Width="120" Foreground="#9a42ff"/>
+                                        <TextBox x:Name="TxtShouldersHome" Width="160"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5" HorizontalAlignment="Center">
+                                        <TextBlock Text="Upper Arm:" Width="120" Foreground="#9a42ff"/>
+                                        <TextBox x:Name="TxtUpperArmHome" Width="160"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5" HorizontalAlignment="Center">
+                                        <TextBlock Text="Forearm:" Width="120" Foreground="#9a42ff"/>
+                                        <TextBox x:Name="TxtForearmHome" Width="160"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5" HorizontalAlignment="Center">
+                                        <TextBlock Text="Wrist:" Width="120" Foreground="#9a42ff"/>
+                                        <TextBox x:Name="TxtWristHome" Width="160"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5" HorizontalAlignment="Center">
+                                        <TextBlock Text="Thigh:" Width="120" Foreground="#9a42ff"/>
+                                        <TextBox x:Name="TxtThighHome" Width="160"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5" HorizontalAlignment="Center">
+                                        <TextBlock Text="Calf:" Width="120" Foreground="#9a42ff"/>
+                                        <TextBox x:Name="TxtCalfHome" Width="160"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Text="Ankle:" Width="120" Foreground="#9a42ff"/>
+                                        <TextBox x:Name="TxtAnkleHome" Width="160"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel HorizontalAlignment="Center">
+                                    <Button x:Name="BtnSaveMeasHome"
+                                        Content="Save Measurements"
+                                        Width="160" Height="35"
+                                        Background="#9a42ff" Foreground="White"
+                                        Click="BtnSaveMeasHome_Click"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Progress Photo Uploads -->
+                        <Border x:Name="BorderWeeklyProgressQuick"
+        BorderBrush="#9a42ff"
+        BorderThickness="1"
+        CornerRadius="5"
+        Padding="10"
+        Margin="0,0,0,10"
+        Visibility="Collapsed">
+                            <StackPanel>
+                                <TextBlock Text="Weekly Progress Pictures"
+               FontSize="16" FontWeight="Bold" Margin="0,0,0,8" Foreground="#9a42ff"/>
+                                <TextBlock x:Name="TxtWeeklyProgressWeekLabel"
+               FontSize="13" Foreground="#9a42ff" Margin="0,0,0,10"
+               Text="Current Week"/>
+
+                                <!-- Picture Upload Buttons and Previews (no BEFORE, no week nav) -->
+                                <WrapPanel>
+                                    <StackPanel Margin="5">
+                                        <Button x:Name="BtnUploadFrontalHome" Content="Upload Frontal" Width="120" Height="30" Click="BtnUploadFrontalHome_Click"/>
+                                        <Image x:Name="ImgFrontalPreviewHome" Width="120" Height="120" Stretch="Uniform" Visibility="Collapsed" Margin="0,5,0,0"/>
+                                    </StackPanel>
+                                    <StackPanel Margin="5">
+                                        <Button x:Name="BtnUploadLeftHome" Content="Upload Left" Width="120" Height="30" Click="BtnUploadLeftHome_Click"/>
+                                        <Image x:Name="ImgLeftPreviewHome" Width="120" Height="120" Stretch="Uniform" Visibility="Collapsed" Margin="0,5,0,0"/>
+                                    </StackPanel>
+                                    <StackPanel Margin="5">
+                                        <Button x:Name="BtnUploadRightHome" Content="Upload Right" Width="120" Height="30" Click="BtnUploadRightHome_Click"/>
+                                        <Image x:Name="ImgRightPreviewHome" Width="120" Height="120" Stretch="Uniform" Visibility="Collapsed" Margin="0,5,0,0"/>
+                                    </StackPanel>
+                                    <StackPanel Margin="5">
+                                        <Button x:Name="BtnUploadBackHome" Content="Upload Back" Width="120" Height="30" Click="BtnUploadBackHome_Click"/>
+                                        <Image x:Name="ImgBackPreviewHome" Width="120" Height="120" Stretch="Uniform" Visibility="Collapsed" Margin="0,5,0,0"/>
+                                    </StackPanel>
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+
+                    </StackPanel>
+                </Expander>
             </StackPanel>
         </ScrollViewer>
 
         <!-- Modal Overlay -->
-        <Grid x:Name="ModalOverlay" Visibility="Collapsed"
-              Background="#80000000" Panel.ZIndex="100">
-              <ContentControl x:Name="ExerciseCompletionModal"
-                              HorizontalAlignment="Center"
-                              VerticalAlignment="Center"
-                              Visibility="Collapsed"/>
-
+        <Grid x:Name="ModalOverlay" Visibility="Collapsed" Background="#80000000" Panel.ZIndex="100">
+            <ContentControl x:Name="ExerciseCompletionModal"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Visibility="Collapsed"/>
         </Grid>
     </Grid>
 </Page>
