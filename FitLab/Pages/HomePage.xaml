@@ -7,20 +7,20 @@
       mc:Ignorable="d"
       d:DesignHeight="800" d:DesignWidth="1200"
       Title="HomePage"
-      Background="#222">
+      Background="Transparent">
 
     <Grid>
         <!-- Main Content Layer -->
         <ScrollViewer>
             <StackPanel Margin="20" Orientation="Vertical" VerticalAlignment="Top">
                 <!-- Header -->
-                <TextBlock x:Name="WelcomeText" FontSize="26" FontWeight="Bold" Foreground="White" />
+                <TextBlock x:Name="WelcomeText" FontSize="26" FontWeight="Bold" Foreground="#9a42ff" />
 
                 <!-- Quick Actions -->
-                <TextBlock Text="Quick Actions" FontSize="22" FontWeight="Bold" Margin="0,0,0,10" Foreground="White"/>
+                <TextBlock Text="Quick Actions" FontSize="22" FontWeight="Bold" Margin="0,0,0,10" Foreground="#9a42ff"/>
 
                 <!-- Daily Quick Actions -->
-                <Expander Header="Daily Quick Actions" IsExpanded="True">
+                <Expander Header="Daily Quick Actions" IsExpanded="True" Foreground="#9a42ff">
                     <StackPanel Margin="0,10,0,0">
                         <!-- Today's Workout -->
                         <Border BorderBrush="#9a42ff" BorderThickness="2" CornerRadius="8" Padding="10" Margin="0,0,0,20">
@@ -114,7 +114,7 @@
                 </Expander>
 
                 <!-- Weekly Quick Actions -->
-                <Expander Header="Weekly Quick Actions" IsExpanded="True" Margin="0,10,0,0">
+                <Expander Header="Weekly Quick Actions" IsExpanded="True" Margin="0,10,0,0" Foreground="#9a42ff">
                     <StackPanel Margin="0,10,0,0">
                         <!-- Weekly Weight -->
                         <Border x:Name="BorderWeeklyWeightQuick"

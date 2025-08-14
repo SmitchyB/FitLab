@@ -89,10 +89,7 @@ namespace FitLab.Pages
             }
             var db = new LocalDatabaseService(); // Create an instance of the database service
             db.SaveUser(_user); // Save the updated user data to the local database
-            SessionState.CurrentWorkoutDay = CalculateCurrentDay.GetCurrentDayNumber( // Calculate the current workout day number based on the user's created date and plan length
-                _user.CreatedOn,// Use the user's created date to calculate the current workout day
-                _user.WorkoutPlan.PlanLength // Use the current plan length to determine the current day number
-            );
+            SessionState.CurrentWorkoutDay = CalculateCurrentDay.GetCurrentDayNumber(_user.CreatedOn, _user.WorkoutPlan.PlanLength, TimeZoneInfo.Local);
             _isEditing = false; // Set the editing mode to false
             SaveButton.Visibility = Visibility.Collapsed; // Hide the Save button
             CancelButton.Visibility = Visibility.Collapsed; // Hide the Cancel button

@@ -26,6 +26,29 @@ namespace FitLab.Pages
         {
             InitializeComponent();
             _currentUser = _db.LoadFirstUser() ?? throw new Exception("No user found."); // Ensure we have a user loaded
+            var tz = TimeZoneInfo.Local;
+            if (FitLab.AppState.SessionState.CurrentWeek == 0 ||
+                FitLab.AppState.SessionState.CurrentAbsoluteDay == 0 ||
+                FitLab.AppState.SessionState.CurrentWorkoutDay == 0)
+            {
+                FitLab.AppState.SessionState.CurrentWeek =
+                    FitLab.Components.CalculateCurrentWeek.GetWeekNumber(_currentUser.CreatedOn, tz);
+
+                FitLab.AppState.SessionState.CurrentWorkoutDay =
+                    FitLab.Helpers.CalculateCurrentDay.GetCurrentDayNumber(
+                        _currentUser.CreatedOn,
+                        _currentUser.WorkoutPlan?.PlanLength ?? 1,
+                        tz);
+
+                var createdLocal = _currentUser.CreatedOn.Kind == DateTimeKind.Utc
+                    ? TimeZoneInfo.ConvertTimeFromUtc(_currentUser.CreatedOn, tz)
+                    : (_currentUser.CreatedOn.Kind == DateTimeKind.Unspecified
+                        ? DateTime.SpecifyKind(_currentUser.CreatedOn, DateTimeKind.Local)
+                        : _currentUser.CreatedOn);
+
+                FitLab.AppState.SessionState.CurrentAbsoluteDay =
+                    FitLab.Helpers.CalculateCurrentDay.GetAbsoluteDayNumber(createdLocal, tz);
+            }
             //Welcome Text setup
             WelcomeText.Text = $"Welcome {_currentUser.Name ?? "User"} to Week {SessionState.CurrentWeek}/Day {SessionState.CurrentAbsoluteDay} of your workout journey! " +
                                $"This is Day {SessionState.CurrentWorkoutDay} of your workout plan.";
@@ -62,67 +85,41 @@ namespace FitLab.Pages
         //Creates the UI node for an exercise in the quick action list.
         private StackPanel CreateExerciseNode(Exercise ex, string sectionName)
         {
-            var outerPanel = new StackPanel // outer panel for the exercise node
+            var outerPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 5, 0, 5), HorizontalAlignment = HorizontalAlignment.Stretch }; // container row for text + button
+            var textPanel = new StackPanel { Orientation = Orientation.Vertical, VerticalAlignment = VerticalAlignment.Center, Width = 600 }; // holds title and description
+            var mainInfo = new TextBlock { Text = $"{ex.Name} - {string.Join(", ", ex.Type)} - {ex.MuscleGroup} - {ex.Difficulty} - {string.Join(", ", ex.Equipment)}", Foreground = Brushes.White, FontWeight = FontWeights.Bold }; // exercise summary line
+            var description = new TextBlock { Text = ex.Description, TextWrapping = TextWrapping.Wrap, Foreground = Brushes.LightGray, FontSize = 12 }; // exercise description
+            var btn = new Button { Width = 110, Height = 36, Background = Brushes.Transparent, BorderBrush = Brushes.Transparent, BorderThickness = new Thickness(0), Padding = new Thickness(0), Margin = new Thickness(10, 5, 0, 5), VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Right, VerticalContentAlignment = VerticalAlignment.Center, HorizontalContentAlignment = HorizontalAlignment.Center, Cursor = Cursors.Hand, SnapsToDevicePixels = true, UseLayoutRounding = true }; // right-side action area
+            void MarkCompleted()
             {
-                Orientation = Orientation.Horizontal,
-                Margin = new Thickness(0, 5, 0, 5),
-                HorizontalAlignment = HorizontalAlignment.Stretch
-            };
-            var textPanel = new StackPanel // inner panel for the exercise text information
+                btn.IsEnabled = false; // disable interaction
+                btn.Cursor = Cursors.Arrow; // normal cursor
+                btn.Height = 36; // ensure consistent size
+                btn.Padding = new Thickness(10, 4, 10, 4); // padding around text
+                btn.Background = Brushes.Black; // black background
+                btn.BorderBrush = Brushes.LimeGreen; // green border
+                btn.BorderThickness = new Thickness(1); // 1px border thickness
+                btn.Content = new TextBlock { Text = "Completed", Foreground = Brushes.LimeGreen, FontWeight = FontWeights.Bold, VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Center }; // green text label
+            }
+            if (IsExerciseCompletedToday(ex.Guid)) { MarkCompleted(); } // already completed
+            else
             {
-                Orientation = Orientation.Vertical,
-                VerticalAlignment = VerticalAlignment.Center,
-                Width = 600
-            };
-            var mainInfo = new TextBlock // main information about the exercise
-            {
-                Text = $"{ex.Name} - {string.Join(", ", ex.Type)} - {ex.MuscleGroup} - {ex.Difficulty} - {string.Join(", ", ex.Equipment)}",
-                Foreground = Brushes.White,
-                FontWeight = FontWeights.Bold
-            };
-            var description = new TextBlock // description of the exercise
-            {
-                Text = ex.Description,
-                TextWrapping = TextWrapping.Wrap,
-                Foreground = Brushes.LightGray,
-                FontSize = 12
-            };
-            var btn = new Button // button to complete the exercise
-            {
-                Width = 45,
-                Height = 45,
-                Background = Brushes.Transparent,
-                BorderBrush = Brushes.Transparent,
-                Padding = new Thickness(5),
-                Margin = new Thickness(10, 5, 0, 5),
-                VerticalAlignment = VerticalAlignment.Center,
-                HorizontalAlignment = HorizontalAlignment.Right,
-                Cursor = Cursors.Hand
-            };
-            var img = new Image // image for the button
-            {
-                Source = new BitmapImage(new Uri("pack://application:,,,/Assets/Images/CheckIcon.png")),
-                Width = 30,
-                Height = 30,
-                Stretch = Stretch.Uniform
-            };
-            btn.Content = img; // sets the image as the button content
-            btn.Click += (s, e) => // click event for the button
-            {
-                var modal = new CompleteExModal(ex, sectionName, () => // callback when exercise is completed
+                btn.Content = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/Assets/Images/CheckIcon.png")), Width = 24, Height = 24, Stretch = Stretch.Uniform }; // check icon
+                btn.Click += (s, e) =>
                 {
-                    ExerciseCompletionModal.Visibility = Visibility.Collapsed; // hides the modal
-                    ModalOverlay.Visibility = Visibility.Collapsed; // hides the overlay
-                });
-                ExerciseCompletionModal.Content = modal; // sets the modal content to the exercise completion modal
-                ExerciseCompletionModal.Visibility = Visibility.Visible; // shows the modal
-                ModalOverlay.Visibility = Visibility.Visible; // shows the overlay
-            };
-            textPanel.Children.Add(mainInfo); // adds the main information text block to the inner panel
-            textPanel.Children.Add(description); // adds the description text block to the inner panel
-            outerPanel.Children.Add(textPanel); // adds the inner panel to the outer panel
-            outerPanel.Children.Add(btn); // adds the button to the outer panel
-            return outerPanel; // returns the outer panel containing the exercise node
+                    var modal = new CompleteExModal(ex, sectionName,
+                        onComplete: () => { ExerciseCompletionModal.Visibility = Visibility.Collapsed; ModalOverlay.Visibility = Visibility.Collapsed; MarkCompleted(); }, // hide modal + overlay, mark complete
+                        onCancel: () => { ExerciseCompletionModal.Visibility = Visibility.Collapsed; ModalOverlay.Visibility = Visibility.Collapsed; }); // hide modal + overlay
+                    ExerciseCompletionModal.Content = modal; // load modal
+                    ExerciseCompletionModal.Visibility = Visibility.Visible; // show modal
+                    ModalOverlay.Visibility = Visibility.Visible; // show overlay
+                };
+            }
+            textPanel.Children.Add(mainInfo); // add title
+            textPanel.Children.Add(description); // add description
+            outerPanel.Children.Add(textPanel); // add text panel
+            outerPanel.Children.Add(btn); // add button
+            return outerPanel; // return row
         }
         // ===== Water Intake (Home Quick Action) =====
         //Loads today's water intake from the user data and displays it in the home quick action.
@@ -472,6 +469,20 @@ namespace FitLab.Pages
                 _db.SaveUser(_currentUser); // saves the updated user data to the database
                 CompleteIfAllFour(); // checks if all four required pictures are uploaded and completes the weekly progress if so
             } 
+        }
+        // Converts any DateTime to a local date safely.
+        private static DateTime ToLocalDate(DateTime dt)
+        {
+            if (dt.Kind == DateTimeKind.Utc) return TimeZoneInfo.ConvertTimeFromUtc(dt, TimeZoneInfo.Local).Date; // convert UTC to local
+            if (dt.Kind == DateTimeKind.Local) return dt.Date; // already local
+            return DateTime.SpecifyKind(dt, DateTimeKind.Local).Date; // assume local if unspecified
+        }
+        // Checks if the exercise is completed today.
+        private bool IsExerciseCompletedToday(Guid exId)
+        {
+            var today = GetTodayLocalDate(); // get today's local date
+            var ce = _currentUser.CompletedExercises.FirstOrDefault(c => c.ExerciseId == exId); // find completion record
+            return ce != null && ce.Entries.Any(en => ToLocalDate(en.DateCompleted) == today); // match on date
         }
     }
 }

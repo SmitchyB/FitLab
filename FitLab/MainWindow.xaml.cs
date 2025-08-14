@@ -22,7 +22,7 @@ namespace FitLab
             if (user != null)
             {
                 SessionState.CurrentWeek = CalculateCurrentWeek.GetWeekNumber(user.CreatedOn, TimeZoneInfo.Local);
-                SessionState.CurrentWorkoutDay = CalculateCurrentDay.GetCurrentDayNumber(user.CreatedOn, user.WorkoutPlan.PlanLength);
+                SessionState.CurrentWorkoutDay = CalculateCurrentDay.GetCurrentDayNumber(user.CreatedOn, user.WorkoutPlan.PlanLength, TimeZoneInfo.Local);
                 SessionState.CurrentAbsoluteDay = CalculateCurrentDay.GetAbsoluteDayNumber(user.CreatedOn, TimeZoneInfo.Local);
                 Header.Visibility = Visibility.Visible;
                 MainFrame.Navigate(new Pages.HomePage());

@@ -1,12 +1,13 @@
 ﻿using FitLab.Components;
 using FitLab.Data;
+using FitLab.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
-using System.Diagnostics;
 
 
 namespace FitLab.Pages
@@ -475,7 +476,7 @@ namespace FitLab.Pages
         private void FinishIntake(object sender, RoutedEventArgs e) // This method is called when the user clicks the "Finish Intake" button
         {
             _newUser.CompletedIntake = true; // Mark the user as having completed the intake process
-            _newUser.CreatedOn = DateTime.UtcNow; // Set the CreatedOn date
+            _newUser.CreatedOn = DateTime.UtcNow.AddDays(-7);  // Set the CreatedOn date
 
             if (_newUser.WeightHistory.Count > 0) // Check if the user has entered any weight history
             {
@@ -508,6 +509,22 @@ namespace FitLab.Pages
             var db = new LocalDatabaseService(); // Create an instance of the LocalDatabaseService to interact with the local database
             db.SaveUser(_newUser); // Save the new user to the local database
             db.SaveCurrentUserId(_newUser.Id); // Save the current user ID to the local database
+            var tz = TimeZoneInfo.Local;
+
+            // Week number (0-based)
+            FitLab.AppState.SessionState.CurrentWeek =
+                FitLab.Components.CalculateCurrentWeek.GetWeekNumber(_newUser.CreatedOn, tz);
+
+            // Plan day (1-based). If plan missing, default to 1.
+            FitLab.AppState.SessionState.CurrentWorkoutDay =
+                _newUser.WorkoutPlan != null
+                    ? CalculateCurrentDay.GetCurrentDayNumber(_newUser.CreatedOn, _newUser.WorkoutPlan.PlanLength, tz)
+                    : 1;
+
+            // Absolute day (1-based) – uses local created date
+            var createdLocal = TimeZoneInfo.ConvertTimeFromUtc(_newUser.CreatedOn, tz);
+            FitLab.AppState.SessionState.CurrentAbsoluteDay =
+                CalculateCurrentDay.GetAbsoluteDayNumber(createdLocal, tz);
 
             ((MainWindow)Application.Current.MainWindow).Header.Visibility = Visibility.Visible; //Make the header visible in the main window
             NavigationService.Navigate(new HomePage()); // Navigate to the HomePage after completing the intake process

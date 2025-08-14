@@ -5,11 +5,23 @@ namespace FitLab.Helpers
     public static class CalculateCurrentDay
     {
         // gets the current workout plan day number based on the created date and plan length
-        public static int GetCurrentDayNumber(DateTime createdOn, int planLength)
+        public static int GetCurrentDayNumber(DateTime createdOn, int planLength, TimeZoneInfo tz)
         {
-            int daysSinceStart = (DateTime.UtcNow.Date - createdOn.Date).Days; // Calculate days since the start date
-            return (daysSinceStart % planLength) + 1; // calculate the current day number in the plan, ensuring it's 1-indexed
+            var nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, tz).Date;
+            DateTime startLocal;
+
+            if (createdOn.Kind == DateTimeKind.Utc)
+                startLocal = TimeZoneInfo.ConvertTimeFromUtc(createdOn, tz).Date;
+            else if (createdOn.Kind == DateTimeKind.Unspecified)
+                startLocal = DateTime.SpecifyKind(createdOn, DateTimeKind.Local).Date; // assumes createdOn was saved in local
+            else
+                startLocal = createdOn.Date;
+
+            var days = (nowLocal - startLocal).Days;
+            if (days < 0) days = 0; // clamp
+            return (days % planLength) + 1; // still 1-indexed
         }
+
         // gets the absolute day number based on the created date in local time and the current date in the specified timezone
         public static int GetAbsoluteDayNumber(DateTime createdOnLocal, TimeZoneInfo tz, DateTime? nowUtc = null)
         {
